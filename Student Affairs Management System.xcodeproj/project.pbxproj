@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		BA8209D42979D57B00BD7AB3 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8209D32979D57B00BD7AB3 /* main.c */; };
+		BA8209DC2979D59C00BD7AB3 /* Student.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8209DB2979D59C00BD7AB3 /* Student.c */; };
+		BA8209E22979D6F000BD7AB3 /* Utility.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8209E12979D6F000BD7AB3 /* Utility.c */; };
+		BA8209E52979DAC200BD7AB3 /* Admin.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8209E42979DAC200BD7AB3 /* Admin.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +28,12 @@
 /* Begin PBXFileReference section */
 		BA8209D02979D57B00BD7AB3 /* Student Affairs Management System */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Student Affairs Management System"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA8209D32979D57B00BD7AB3 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		BA8209DA2979D59C00BD7AB3 /* Student.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Student.h; sourceTree = "<group>"; };
+		BA8209DB2979D59C00BD7AB3 /* Student.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Student.c; sourceTree = "<group>"; };
+		BA8209E02979D6F000BD7AB3 /* Utility.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Utility.h; sourceTree = "<group>"; };
+		BA8209E12979D6F000BD7AB3 /* Utility.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Utility.c; sourceTree = "<group>"; };
+		BA8209E32979DAC200BD7AB3 /* Admin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Admin.h; sourceTree = "<group>"; };
+		BA8209E42979DAC200BD7AB3 /* Admin.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Admin.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +67,12 @@
 			isa = PBXGroup;
 			children = (
 				BA8209D32979D57B00BD7AB3 /* main.c */,
+				BA8209DB2979D59C00BD7AB3 /* Student.c */,
+				BA8209DA2979D59C00BD7AB3 /* Student.h */,
+				BA8209E42979DAC200BD7AB3 /* Admin.c */,
+				BA8209E32979DAC200BD7AB3 /* Admin.h */,
+				BA8209E12979D6F000BD7AB3 /* Utility.c */,
+				BA8209E02979D6F000BD7AB3 /* Utility.h */,
 			);
 			path = "Student Affairs Management System";
 			sourceTree = "<group>";
@@ -120,6 +135,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				BA8209D42979D57B00BD7AB3 /* main.c in Sources */,
+				BA8209E52979DAC200BD7AB3 /* Admin.c in Sources */,
+				BA8209DC2979D59C00BD7AB3 /* Student.c in Sources */,
+				BA8209E22979D6F000BD7AB3 /* Utility.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,6 +257,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				GCC_NO_COMMON_BLOCKS = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -247,6 +266,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				GCC_NO_COMMON_BLOCKS = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
