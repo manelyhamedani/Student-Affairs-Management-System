@@ -12,7 +12,7 @@
 struct _user current_user;
 #define max_size    500
 
-int callback(void *data, int argc, char **argv, char **col_name) {
+static int callback(void *data, int argc, char **argv, char **col_name) {
     if (strcmp(argv[0], "1") == 0) {
         *((int *)data) = 1;
     }
@@ -28,8 +28,8 @@ int user_login(const char *username, const char *password, sqlite3 *db) {
     char sql_student[max_size];
     char sql_admin[max_size];
     int exist = 0;
-    sprintf(sql_student, "select exists(select * from STUDENTS where username = '%s' and password = '%s');", username, password);
-    sprintf(sql_admin, "select exists(select * from ADMINS where username = '%s' and password = '%s');", username, password);
+    sprintf(sql_student, "select exists(select * from STUDENTS where student_id = '%s' and password = '%s');", username, password);
+    sprintf(sql_admin, "select exists(select * from ADMINS where admin_id = '%s' and password = '%s');", username, password);
     int rc = sqlite3_exec(db, sql_student, callback, &exist, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
@@ -72,7 +72,7 @@ int user_logout(const char *username) {
 int user_register(const char *name, const char *family, const char *user_id, const char *password, const char *national_id, const char *birthdate, const char *gender, const char *type, sqlite3 *db) {
     char sql[max_size];
     char *errmsg = NULL;
-    sprintf(sql, "insert into PENDING values ('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s');", name, family, user_id, password, national_id, birthdate, gender, type);
+    sprintf(sql, "insert into PENDING values ('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s');", user_id, name, family, password, national_id, birthdate, gender, type);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
@@ -85,7 +85,7 @@ int user_register(const char *name, const char *family, const char *user_id, con
 int create_table(sqlite3 *db, const char *tbl_name, const char *definition) {
     char *errmsg = NULL;
     char sql[max_size];
-    sprintf(sql, "create table %s (%s);", tbl_name, definition);
+    sprintf(sql, "create table if not exists %s (%s);", tbl_name, definition);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);

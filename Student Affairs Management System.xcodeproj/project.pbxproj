@@ -11,6 +11,7 @@
 		BA8209DC2979D59C00BD7AB3 /* Student.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8209DB2979D59C00BD7AB3 /* Student.c */; };
 		BA8209E22979D6F000BD7AB3 /* Utility.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8209E12979D6F000BD7AB3 /* Utility.c */; };
 		BA8209E52979DAC200BD7AB3 /* Admin.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8209E42979DAC200BD7AB3 /* Admin.c */; };
+		BA8209E8297AF74300BD7AB3 /* Test Case.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8209E7297AF74300BD7AB3 /* Test Case.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -34,6 +35,8 @@
 		BA8209E12979D6F000BD7AB3 /* Utility.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Utility.c; sourceTree = "<group>"; };
 		BA8209E32979DAC200BD7AB3 /* Admin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Admin.h; sourceTree = "<group>"; };
 		BA8209E42979DAC200BD7AB3 /* Admin.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Admin.c; sourceTree = "<group>"; };
+		BA8209E6297AF74300BD7AB3 /* Test Case.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Test Case.h"; sourceTree = "<group>"; };
+		BA8209E7297AF74300BD7AB3 /* Test Case.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "Test Case.c"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,12 +70,14 @@
 			isa = PBXGroup;
 			children = (
 				BA8209D32979D57B00BD7AB3 /* main.c */,
-				BA8209DB2979D59C00BD7AB3 /* Student.c */,
+				BA8209E6297AF74300BD7AB3 /* Test Case.h */,
+				BA8209E7297AF74300BD7AB3 /* Test Case.c */,
 				BA8209DA2979D59C00BD7AB3 /* Student.h */,
-				BA8209E42979DAC200BD7AB3 /* Admin.c */,
+				BA8209DB2979D59C00BD7AB3 /* Student.c */,
 				BA8209E32979DAC200BD7AB3 /* Admin.h */,
-				BA8209E12979D6F000BD7AB3 /* Utility.c */,
+				BA8209E42979DAC200BD7AB3 /* Admin.c */,
 				BA8209E02979D6F000BD7AB3 /* Utility.h */,
+				BA8209E12979D6F000BD7AB3 /* Utility.c */,
 			);
 			path = "Student Affairs Management System";
 			sourceTree = "<group>";
@@ -138,6 +143,7 @@
 				BA8209E52979DAC200BD7AB3 /* Admin.c in Sources */,
 				BA8209DC2979D59C00BD7AB3 /* Student.c in Sources */,
 				BA8209E22979D6F000BD7AB3 /* Utility.c in Sources */,
+				BA8209E8297AF74300BD7AB3 /* Test Case.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -199,6 +205,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				SYMROOT = build;
 			};
 			name = Debug;
 		};
@@ -250,6 +257,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
+				SYMROOT = build;
 			};
 			name = Release;
 		};
