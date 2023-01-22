@@ -105,5 +105,41 @@ int remove_student(const char *user_id) {
     return success;
 }
 
+int deactivate(const char *user_id) {
+    if (current_user.user_type != admin) {
+        return permission_denied;
+    }
+    if (is_exists("STUDENTS", user_id, NULL, "student") != 1) {
+        return not_found;
+    }
+    char *errmsg = NULL;
+    char sql[max_size];
+    sprintf(sql, "update STUDENTS set activate = 0;");
+    int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return -1;
+    }
+    return success;
+}
+
+int define_self(const char *self_id, const char *name, const char *location, const char *capacity, const char *type, const char *meal, const char *lunch_time, const char *dinner_time) {
+    if (current_user.user_type != admin) {
+        return permission_denied;
+    }
+    char *errmsg = NULL;
+    char sql[max_size];
+    sprintf(sql, "insert into SELF values(%s, '%s', '%s', %s, '%s', '%s', '%s', '%s');", self_id, name, location, capacity, type, meal, lunch_time, dinner_time);
+    int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return -1;
+    }
+    return success;
+}
+
+
 
 

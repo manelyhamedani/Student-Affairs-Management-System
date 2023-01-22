@@ -56,27 +56,41 @@ typedef struct {
     char user_id[max_size_parameter];
 } remove_student_parameter;
 
+typedef struct {
+    char user_id[max_size_parameter];
+} deactivate_parameter;
+
+typedef struct {
+    char self_id[max_size_parameter];
+    char name[max_size_parameter];
+    char location[max_size_parameter];
+    char capacity[max_size_parameter];
+    char type[max_size_parameter];
+    char meal[max_size_parameter];
+    char lunch_time[max_size_parameter];
+    char dinner_time[max_size_parameter];
+} define_self_parameter;
+
 
 int get_login_parameter(FILE *input, login_parameter *parameter) {
     char parameter_name[max_size_parameter_name];
     char colon;
     char separator;
-    char end;
+    char garbage[max_size_parameter];
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "user")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%[^|]", parameter->username);
     fscanf(input, "%c%[^:]%c", &separator, parameter_name, &colon);
     if (strcmp(parameter_name, "password")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
-    fscanf(input, "%s%c", parameter->password, &end);
+    fscanf(input, "%s", parameter->password);
     if (feof(input)) {
         return eof;
-    }
-    if (end != '\n') {
-        return invalid;
     }
     return success;
 }
@@ -84,17 +98,15 @@ int get_login_parameter(FILE *input, login_parameter *parameter) {
 int get_logout_parameter(FILE *input, logout_parameter *parameter) {
     char parameter_name[max_size_parameter_name];
     char colon;
-    char end;
+    char garbage[max_size_parameter];
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "user")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
-    fscanf(input, "%s%c", parameter->username, &end);
+    fscanf(input, "%s", parameter->username);
     if (feof(input)) {
         return eof;
-    }
-    if (end != '\n') {
-        return invalid;
     }
     return success;
 }
@@ -103,52 +115,57 @@ int get_register_parameter(FILE *input, register_parameter *parameter) {
     char parameter_name[max_size_parameter_name];
     char colon;
     char separator;
-    char end;
+    char garbage[max_size_parameter];
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "name")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->name, &separator);
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "family")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->family, &separator);
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "user-id")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->user_id, &separator);
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "password")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->password, &separator);
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "national-id-code")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->national_id, &separator);
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "birthdate")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->birthdate, &separator);
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "gender")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->gender, &separator);
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "type")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
-    fscanf(input, "%s%c", parameter->type, &end);
+    fscanf(input, "%s", parameter->type);
     if (feof(input)) {
         return eof;
-    }
-    if (end != '\n') {
-        return invalid;
     }
     return success;
 }
@@ -157,8 +174,10 @@ int get_approve_parameter(FILE *input, approve_parameter *parameter) {
     char parameter_name[max_size_parameter_name];
     char colon;
     char separator;
+    char garbage[max_size_parameter];
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "user")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->user_id, &separator);
@@ -171,6 +190,7 @@ int get_approve_parameter(FILE *input, approve_parameter *parameter) {
         return eol;
     }
     else if (separator != '|') {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     return success;
@@ -180,18 +200,22 @@ int get_change_pass_parameter(FILE *input, change_pass_parameter *parameter) {
     char parameter_name[max_size_parameter_name];
     char colon;
     char separator;
+    char garbage[max_size_parameter];
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "user")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->user_id, &separator);
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "old-pass")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->old_pass, &separator);
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "new-pass")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%s", parameter->new_pass);
@@ -202,13 +226,16 @@ int get_change_student_pass_parameter(FILE *input, change_student_pass_parameter
     char parameter_name[max_size_parameter_name];
     char colon;
     char separator;
+    char garbage[max_size_parameter];
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "user")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->user_id, &separator);
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "new-pass")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%s", parameter->new_pass);
@@ -218,11 +245,102 @@ int get_change_student_pass_parameter(FILE *input, change_student_pass_parameter
 int get_remove_student_parameter(FILE *input, remove_student_parameter *parameter) {
     char parameter_name[max_size_parameter_name];
     char colon;
+    char garbage[max_size_parameter];
     fscanf(input, "%[^:]%c", parameter_name, &colon);
     if (strcmp(parameter_name, "user")) {
+        fgets(garbage, max_size_parameter, input);
         return invalid;
     }
     fscanf(input, "%s", parameter->user_id);
+    return success;
+}
+
+int get_deactivate_parameter(FILE *input, deactivate_parameter *parameter) {
+    char parameter_name[max_size_parameter_name];
+    char colon;
+    char garbage[max_size_parameter];
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "user")) {
+        fgets(garbage, max_size_parameter, input);
+        return invalid;
+    }
+    fscanf(input, "%s", parameter->user_id);
+    return success;
+}
+
+int get_define_self_parameter(FILE *input, define_self_parameter *parameter) {
+    char parameter_name[max_size_parameter_name];
+    char colon;
+    char separator;
+    char garbage[max_size_parameter];
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "id")) {
+        fgets(garbage, max_size_parameter, input);
+        return invalid;
+    }
+    fscanf(input, "%[^|]%c", parameter->self_id, &separator);
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "name")) {
+        fgets(garbage, max_size_parameter, input);
+        return invalid;
+    }
+    fscanf(input, "%[^|]%c", parameter->name, &separator);
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "location")) {
+        fgets(garbage, max_size_parameter, input);
+        return invalid;
+    }
+    fscanf(input, "%[^|]%c", parameter->location, &separator);
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "capacity")) {
+        fgets(garbage, max_size_parameter, input);
+        return invalid;
+    }
+    fscanf(input, "%[^|]%c", parameter->capacity, &separator);
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "type")) {
+        fgets(garbage, max_size_parameter, input);
+        return invalid;
+    }
+    fscanf(input, "%[^|]%c", parameter->type, &separator);
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "meal")) {
+        fgets(garbage, max_size_parameter, input);
+        return invalid;
+    }
+    fscanf(input, "%[^|]%c", parameter->meal, &separator);
+    if (strcmp(parameter->meal, "lunch") == 0) {
+        fscanf(input, "%[^:]%c", parameter_name, &colon);
+        if (strcmp(parameter_name, "lunch-time-limit")) {
+            fgets(garbage, max_size_parameter, input);
+            return invalid;
+        }
+        fscanf(input, "%s", parameter->lunch_time);
+        parameter->dinner_time[0] = '\0';
+        return success;
+    }
+    if (strcmp(parameter->meal, "dinner") == 0) {
+        fscanf(input, "%[^:]%c", parameter_name, &colon);
+        if (strcmp(parameter_name, "dinner-time-limit")) {
+            fgets(garbage, max_size_parameter, input);
+            return invalid;
+        }
+        fscanf(input, "%s", parameter->dinner_time);
+        parameter->lunch_time[0] = '\0';
+        return success;
+    }
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "lunch-time-limit")) {
+        fgets(garbage, max_size_parameter, input);
+        return invalid;
+    }
+    fscanf(input, "%[^|]%c", parameter->lunch_time, &separator);
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "dinner-time-limit")) {
+        fgets(garbage, max_size_parameter, input);
+        return invalid;
+    }
+    fscanf(input, "%s", parameter->dinner_time);
     return success;
 }
 
@@ -416,6 +534,44 @@ void get_command(FILE *input, FILE *output) {
             continue;
         }
         
+        if (strcmp(command, "deactivate") == 0) {
+            deactivate_parameter parameter;
+            result = get_deactivate_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = deactivate(parameter.user_id);
+                if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
+        
+        if (strcmp(command, "define-self") == 0) {
+            define_self_parameter parameter;
+            result = get_define_self_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = define_self(parameter.self_id, parameter.name, parameter.location, parameter.capacity, parameter.type, parameter.meal, parameter.lunch_time, parameter.dinner_time);
+                if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
         
     }
     
