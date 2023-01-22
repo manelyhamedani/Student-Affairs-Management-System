@@ -8,6 +8,9 @@
 #include <stdio.h>
 #include "Utility.h"
 #include "Admin.h"
+#include "Test Case.h"
+
+#define max_size_filename   100
 
 sqlite3 *db;
 
@@ -137,7 +140,6 @@ int create_my_tables(void) {
     return 0;
 }
 
-
 int main(int argc, const char * argv[]) {
     char *db_name = "samsDB.db";
     if (create_db(db_name, &db) != 0) {
@@ -147,6 +149,31 @@ int main(int argc, const char * argv[]) {
     if (create_my_tables() != 0) {
         puts("Cannot create tables!");
         return -1;
+    }
+    char test_case_flag;
+    puts("Do you wanna open test-case file? (y or n)");
+    scanf("%c", &test_case_flag);
+    if (test_case_flag == 'y' || test_case_flag == 'Y') {
+        char input_name[max_size_filename];
+        char output_name[max_size_filename];
+        puts("Enter input file name:");
+        scanf("%s", input_name);
+        puts("Enter output file name:");
+        scanf("%s", output_name);
+        FILE *input = fopen(input_name, "r");
+        if (input == NULL) {
+            puts("Cannot open input file!");
+            return -1;
+        }
+        FILE *output = fopen(output_name, "w");
+        if (output == NULL) {
+            puts("Cannot open output file!");
+            return -1;
+        }
+        get_command(input, output);
+    }
+    else {
+        
     }
     return 0;
 }

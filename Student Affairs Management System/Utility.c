@@ -12,6 +12,10 @@
 struct _user current_user;
 #define max_size    500
 
+enum result {
+  success, not_found, permission_denied, invalid
+};
+
 static int callback(void *data, int argc, char **argv, char **col_name) {
     if (strcmp(argv[0], "1") == 0) {
         *((int *)data) = 1;
@@ -19,43 +23,42 @@ static int callback(void *data, int argc, char **argv, char **col_name) {
     return 0;
 }
 
-int user_login(const char *username, const char *password, sqlite3 *db) {
-    if (current_user.user_type != none) {
-        fprintf(stderr, "Cannot login!\n");
-        return -1;
-    }
+int is_exists(sqlite3* db, const char *tbl_name, const char *id, const char *type) {
     char *errmsg = NULL;
-    char sql_student[max_size];
-    char sql_admin[max_size];
+    char sql[max_size];
+    sprintf(sql, "select exists(select * from %s where %s_id = %s);", tbl_name, type, id);
     int exist = 0;
-    sprintf(sql_student, "select exists(select * from STUDENTS where student_id = '%s' and password = '%s');", username, password);
-    sprintf(sql_admin, "select exists(select * from ADMINS where admin_id = '%s' and password = '%s');", username, password);
-    int rc = sqlite3_exec(db, sql_student, callback, &exist, &errmsg);
+    int rc = sqlite3_exec(db, sql, callback, &exist, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
         return -1;
     }
     if (exist == 1) {
+        return 1;
+    }
+    return 0;
+}
+
+int user_login(const char *username, const char *password, sqlite3 *db) {
+    if (current_user.user_type != none) {
+//        fprintf(stderr, "Cannot login!\n");
+        return permission_denied;
+    }
+    if (is_exists(db, "STUDENTS", username, "student") == 1) {
         strcpy(current_user.username, username);
         strcpy(current_user.password, password);
         current_user.user_type = student;
-        return 0;
+        return success;
     }
-    rc = sqlite3_exec(db, sql_admin, callback, &exist, &errmsg);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
-        sqlite3_free(errmsg);
-        return -1;
-    }
-    if (exist == 1) {
+    if (is_exists(db, "ADMINS", username, "admin") == 1) {
         strcpy(current_user.username, username);
         strcpy(current_user.password, password);
         current_user.user_type = admin;
-        return 0;
+        return success;
     }
     fprintf(stderr, "Incorrect username or password.\n");
-    return -1;
+    return not_found;
 }
 
 int user_logout(const char *username) {
@@ -63,15 +66,29 @@ int user_logout(const char *username) {
         strcpy(current_user.username, "\0");
         strcpy(current_user.password, "\0");
         current_user.user_type = none;
-        return 0;
+        return success;
     }
     fprintf(stderr, "Incorrect username.\n");
-    return -1;
+    return not_found;
 }
+
 
 int user_register(const char *name, const char *family, const char *user_id, const char *password, const char *national_id, const char *birthdate, const char *gender, const char *type, sqlite3 *db) {
     char sql[max_size];
     char *errmsg = NULL;
+    if (is_exists(db, "PENDING", user_id, "user") == 1) {
+        return permission_denied;
+    }
+    if (strcmp(type, "student") == 0) {
+        if (is_exists(db, "STUDENTS", user_id, type) == 1) {
+            return permission_denied;
+        }
+    }
+    else {
+        if (is_exists(db, "ADMINS", user_id, type) == 1) {
+            return permission_denied;
+        }
+    }
     sprintf(sql, "insert into PENDING values ('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s');", user_id, name, family, password, national_id, birthdate, gender, type);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
@@ -79,7 +96,7 @@ int user_register(const char *name, const char *family, const char *user_id, con
         sqlite3_free(errmsg);
         return -1;
     }
-    return 0;
+    return success;
 }
 
 int create_table(sqlite3 *db, const char *tbl_name, const char *definition) {
