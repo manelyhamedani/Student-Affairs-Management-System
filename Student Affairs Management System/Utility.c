@@ -19,10 +19,15 @@ static int callback(void *data, int argc, char **argv, char **col_name) {
     return 0;
 }
 
-int is_exists(sqlite3* db, const char *tbl_name, const char *user_id, const char *pass, const char *type) {
+int is_exists(const char *tbl_name, const char *user_id, const char *pass, const char *type) {
     char *errmsg = NULL;
     char sql[max_size];
-    sprintf(sql, "select exists(select * from %s where %s_id = '%s' and password = '%s');", tbl_name, type, user_id, pass);
+    if (pass == NULL) {
+        sprintf(sql, "select exists(select * from %s where %s_id = '%s');", tbl_name, type, user_id);
+    }
+    else {
+        sprintf(sql, "select exists(select * from %s where %s_id = '%s' and password = '%s');", tbl_name, type, user_id, pass);
+    }
     int exist = 0;
     int rc = sqlite3_exec(db, sql, callback, &exist, &errmsg);
     if (rc != SQLITE_OK) {
@@ -36,17 +41,17 @@ int is_exists(sqlite3* db, const char *tbl_name, const char *user_id, const char
     return 0;
 }
 
-int user_login(const char *username, const char *password, sqlite3 *db) {
+int user_login(const char *username, const char *password) {
     if (current_user.user_type != none) {
         return permission_denied;
     }
-    if (is_exists(db, "STUDENTS", username, password, "student") == 1) {
+    if (is_exists("STUDENTS", username, password, "student") == 1) {
         strcpy(current_user.username, username);
         strcpy(current_user.password, password);
         current_user.user_type = student;
         return success;
     }
-    if (is_exists(db, "ADMINS", username, password, "admin") == 1) {
+    if (is_exists("ADMINS", username, password, "admin") == 1) {
         strcpy(current_user.username, username);
         strcpy(current_user.password, password);
         current_user.user_type = admin;
@@ -65,20 +70,19 @@ int user_logout(const char *username) {
     return not_found;
 }
 
-
-int user_register(const char *name, const char *family, const char *user_id, const char *password, const char *national_id, const char *birthdate, const char *gender, const char *type, sqlite3 *db) {
+int user_register(const char *name, const char *family, const char *user_id, const char *password, const char *national_id, const char *birthdate, const char *gender, const char *type) {
     char sql[max_size];
     char *errmsg = NULL;
-    if (is_exists(db, "PENDING", user_id, password, "user") == 1) {
+    if (is_exists("PENDING", user_id, password, "user") == 1) {
         return permission_denied;
     }
     if (strcmp(type, "student") == 0) {
-        if (is_exists(db, "STUDENTS", user_id, password, type) == 1) {
+        if (is_exists("STUDENTS", user_id, password, type) == 1) {
             return permission_denied;
         }
     }
     else {
-        if (is_exists(db, "ADMINS", user_id, password, type) == 1) {
+        if (is_exists("ADMINS", user_id, password, type) == 1) {
             return permission_denied;
         }
     }

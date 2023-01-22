@@ -43,7 +43,7 @@ static int callback(void *data, int argc, char **argv, char **col_name) {
     return 0;
 }
 
-int approve(sqlite3 *db, const char *user_id) {
+int approve(const char *user_id) {
     char *errmsg = NULL;
     char sql[max_size];
     int exist = not_found;
@@ -66,5 +66,44 @@ int approve(sqlite3 *db, const char *user_id) {
     }
     return success;
 }
+
+int change_student_pass(const char *user_id, const char *new_pass) {
+    if (current_user.user_type != admin) {
+        return permission_denied;
+    }
+    if (is_exists("STUDENTS", user_id, NULL, "student") != 1) {
+        return not_found;
+    }
+    char *errmsg = NULL;
+    char sql[max_size];
+    sprintf(sql, "update STUDENTS set password = '%s' where student_id = '%s';", new_pass, user_id);
+    int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return -1;
+    }
+    return success;
+}
+
+int remove_student(const char *user_id) {
+    if (current_user.user_type != admin) {
+        return permission_denied;
+    }
+    if (is_exists("STUDENTS", user_id, NULL, "student") != 1) {
+        return not_found;
+    }
+    char *errmsg = NULL;
+    char sql[max_size];
+    sprintf(sql, "delete from STUDENTS where student_id = '%s';", user_id);
+    int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return -1;
+    }
+    return success;
+}
+
 
 

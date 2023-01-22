@@ -47,6 +47,15 @@ typedef struct {
     char new_pass[max_size_parameter];
 } change_pass_parameter;
 
+typedef struct {
+    char user_id[max_size_parameter];
+    char new_pass[max_size_parameter];
+} change_student_pass_parameter;
+
+typedef struct {
+    char user_id[max_size_parameter];
+} remove_student_parameter;
+
 
 int get_login_parameter(FILE *input, login_parameter *parameter) {
     char parameter_name[max_size_parameter_name];
@@ -189,6 +198,34 @@ int get_change_pass_parameter(FILE *input, change_pass_parameter *parameter) {
     return success;
 }
 
+int get_change_student_pass_parameter(FILE *input, change_student_pass_parameter *parameter) {
+    char parameter_name[max_size_parameter_name];
+    char colon;
+    char separator;
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "user")) {
+        return invalid;
+    }
+    fscanf(input, "%[^|]%c", parameter->user_id, &separator);
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "new-pass")) {
+        return invalid;
+    }
+    fscanf(input, "%s", parameter->new_pass);
+    return success;
+}
+
+int get_remove_student_parameter(FILE *input, remove_student_parameter *parameter) {
+    char parameter_name[max_size_parameter_name];
+    char colon;
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "user")) {
+        return invalid;
+    }
+    fscanf(input, "%s", parameter->user_id);
+    return success;
+}
+
 void get_command(FILE *input, FILE *output) {
     char command[max_size_command];
     int command_id;
@@ -207,7 +244,7 @@ void get_command(FILE *input, FILE *output) {
                 fprintf(output, "%d#invalid\n", command_id);
             }
             else {
-                result = user_login(parameter.username, parameter.password, db);
+                result = user_login(parameter.username, parameter.password);
                 if (result == not_found) {
                     fprintf(output, "%d#not-found\n", command_id);
                 }
@@ -254,7 +291,7 @@ void get_command(FILE *input, FILE *output) {
                 fprintf(output, "%d#invalid\n", command_id);
             }
             else {
-                result = user_register(parameter.name, parameter.family, parameter.user_id, parameter.password, parameter.national_id, parameter.birthdate, parameter.gender, parameter.type, db);
+                result = user_register(parameter.name, parameter.family, parameter.user_id, parameter.password, parameter.national_id, parameter.birthdate, parameter.gender, parameter.type);
                 if (result == permission_denied) {
                     fprintf(output, "%d#permission-denied\n", command_id);
                 }
@@ -267,7 +304,7 @@ void get_command(FILE *input, FILE *output) {
                 }
             }
             if (current_user.user_type == admin) {
-                approve(db, parameter.user_id);
+                approve(parameter.user_id);
             }
             continue;
         }
@@ -294,7 +331,7 @@ void get_command(FILE *input, FILE *output) {
                     }
                 }
                 else if (result == eof) {
-                    result = approve(db, parameter.user_id);
+                    result = approve(parameter.user_id);
                     if (result == not_found) {
                         fprintf(output, "not-found\n");
                     }
@@ -304,7 +341,7 @@ void get_command(FILE *input, FILE *output) {
                     break;
                 }
                 else {
-                    result = approve(db, parameter.user_id);
+                    result = approve(parameter.user_id);
                     if (result == not_found) {
                         fprintf(output, "not-found|");
                     }
@@ -337,9 +374,47 @@ void get_command(FILE *input, FILE *output) {
             continue;
         }
         
+        if (strcmp(command, "change-student-pass") == 0) {
+            change_student_pass_parameter parameter;
+            result = get_change_student_pass_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = change_student_pass(parameter.user_id, parameter.new_pass);
+                if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
         
-        
-        
+        if (strcmp(command, "remove-student") == 0) {
+            remove_student_parameter parameter;
+            result = get_remove_student_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = remove_student(parameter.user_id);
+                if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
         
         
     }
