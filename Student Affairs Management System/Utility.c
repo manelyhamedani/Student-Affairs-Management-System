@@ -12,10 +12,6 @@
 struct _user current_user;
 #define max_size    500
 
-enum result {
-  success, not_found, permission_denied, invalid
-};
-
 static int callback(void *data, int argc, char **argv, char **col_name) {
     if (strcmp(argv[0], "1") == 0) {
         *((int *)data) = 1;
@@ -26,7 +22,7 @@ static int callback(void *data, int argc, char **argv, char **col_name) {
 int is_exists(sqlite3* db, const char *tbl_name, const char *id, const char *type) {
     char *errmsg = NULL;
     char sql[max_size];
-    sprintf(sql, "select exists(select * from %s where %s_id = %s);", tbl_name, type, id);
+    sprintf(sql, "select exists(select * from %s where %s_id = '%s');", tbl_name, type, id);
     int exist = 0;
     int rc = sqlite3_exec(db, sql, callback, &exist, &errmsg);
     if (rc != SQLITE_OK) {
@@ -42,7 +38,6 @@ int is_exists(sqlite3* db, const char *tbl_name, const char *id, const char *typ
 
 int user_login(const char *username, const char *password, sqlite3 *db) {
     if (current_user.user_type != none) {
-//        fprintf(stderr, "Cannot login!\n");
         return permission_denied;
     }
     if (is_exists(db, "STUDENTS", username, "student") == 1) {

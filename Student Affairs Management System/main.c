@@ -150,30 +150,33 @@ int main(int argc, const char * argv[]) {
         puts("Cannot create tables!");
         return -1;
     }
-    char test_case_flag;
-    puts("Do you wanna open test-case file? (y or n)");
-    scanf("%c", &test_case_flag);
-    if (test_case_flag == 'y' || test_case_flag == 'Y') {
-        char input_name[max_size_filename];
-        char output_name[max_size_filename];
-        puts("Enter input file name:");
-        scanf("%s", input_name);
-        puts("Enter output file name:");
-        scanf("%s", output_name);
-        FILE *input = fopen(input_name, "r");
-        if (input == NULL) {
-            puts("Cannot open input file!");
-            return -1;
-        }
-        FILE *output = fopen(output_name, "w");
-        if (output == NULL) {
-            puts("Cannot open output file!");
-            return -1;
-        }
-        get_command(input, output);
-    }
-    else {
-        
-    }
+    FILE *input = fopen("input.txt", "r");
+    FILE *output = fopen("output.txt", "w");
+    get_command(input, output);
+//    char test_case_flag;
+//    puts("Do you wanna open test-case file? (y or n)");
+//    scanf("%c", &test_case_flag);
+//    if (test_case_flag == 'y' || test_case_flag == 'Y') {
+//        char input_name[max_size_filename];
+//        char output_name[max_size_filename];
+//        puts("Enter input file name:");
+//        scanf("%s", input_name);
+//        puts("Enter output file name:");
+//        scanf("%s", output_name);
+//        FILE *input = fopen(input_name, "r");
+//        if (input == NULL) {
+//            puts("Cannot open input file!");
+//            return -1;
+//        }
+//        FILE *output = fopen(output_name, "w");
+//        if (output == NULL) {
+//            puts("Cannot open output file!");
+//            return -1;
+//        }
+//        get_command(input, output);
+//    }
+//    else {
+//
+//    }
     return 0;
 }

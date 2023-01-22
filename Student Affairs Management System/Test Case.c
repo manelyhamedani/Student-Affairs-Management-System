@@ -9,8 +9,8 @@
 #include <string.h>
 #include "Utility.h"
 #include <sqlite3.h>
+#include "Admin.h"
 
-extern sqlite3 *db;
 
 #define true                    1
 #define max_size_command        30
@@ -37,9 +37,9 @@ typedef struct {
     char type[max_size_parameter];
 } register_parameter;
 
-enum result {
-  success, not_found, permission_denied, invalid
-};
+typedef struct {
+    char user_id[max_size_parameter];
+} approve_parameter;
 
 
 int get_login_parameter(FILE *input, login_parameter *parameter) {
@@ -66,6 +66,9 @@ int get_login_parameter(FILE *input, login_parameter *parameter) {
         return invalid;
     }
     fscanf(input, "%s%c", parameter->password, &end);
+    if (feof(input)) {
+        return eof;
+    }
     if (end != '\n') {
         return invalid;
     }
@@ -84,6 +87,9 @@ int get_logout_parameter(FILE *input, logout_parameter *parameter) {
         return invalid;
     }
     fscanf(input, "%s%c", parameter->username, &end);
+    if (feof(input)) {
+        return eof;
+    }
     if (end != '\n') {
         return invalid;
     }
@@ -179,8 +185,38 @@ int get_register_parameter(FILE *input, register_parameter *parameter) {
     if (colon != ':') {
         return invalid;
     }
-    fscanf(input, "%[^|]%c", parameter->type, &end);
+    fscanf(input, "%s%c", parameter->type, &end);
+    if (feof(input)) {
+        return eof;
+    }
     if (end != '\n') {
+        return invalid;
+    }
+    return success;
+}
+
+int get_approve_parameter(FILE *input, approve_parameter *parameter) {
+    char paramater_name[max_size_paramater_name];
+    char colon;
+    char separator;
+    fscanf(input, "%[^:]%c", paramater_name, &colon);
+    if (strcmp(paramater_name, "user")) {
+        return invalid;
+    }
+    if (colon != ':') {
+        return invalid;
+    }
+    fscanf(input, "%[^|]%c", parameter->user_id, &separator);
+    if (feof(input)) {
+        return eof;
+    }
+    if (separator == '|') {
+        return success;
+    }
+    if (separator == '\n') {
+        return eol;
+    }
+    else {
         return invalid;
     }
     return success;
@@ -211,6 +247,10 @@ void get_command(FILE *input, FILE *output) {
                 else if (result == permission_denied) {
                     fprintf(output, "%d#permission-denied\n", command_id);
                 }
+                else if (result == eof){
+                    fprintf(output, "%d#success\n", command_id);
+                    break;
+                }
                 else {
                     fprintf(output, "%d#success\n", command_id);
                 }
@@ -227,6 +267,10 @@ void get_command(FILE *input, FILE *output) {
                 result = user_logout(parameter.username);
                 if (result == not_found) {
                     fprintf(output, "%d#not-found\n", command_id);
+                }
+                else if (result == eof){
+                    fprintf(output, "%d#success\n", command_id);
+                    break;
                 }
                 else {
                     fprintf(output, "%d#success\n", command_id);
@@ -245,11 +289,57 @@ void get_command(FILE *input, FILE *output) {
                 if (result == permission_denied) {
                     fprintf(output, "%d#permission-denied\n", command_id);
                 }
+                else if (result == eof){
+                    fprintf(output, "%d#success\n", command_id);
+                    break;
+                }
                 else {
                     fprintf(output, "%d#success\n", command_id);
                 }
             }
+            if (current_user.user_type == admin) {
+                approve(db, parameter.user_id);
+            }
         }
+        
+        if (strcmp(command, "approve") == 0) {
+            fprintf(output, "%d#", command_id);
+            if (current_user.user_type == student) {
+                fprintf(output, "permission-denied\n");
+                char garbage[max_size_parameter];
+                fgets(garbage, max_size_parameter, input);
+                continue;
+            }
+            approve_parameter parameter;
+            while (true) {
+                result = get_approve_parameter(input, &parameter);
+                if (result == invalid) {
+                    fprintf(output, "invalid");
+                    if (feof(input)) {
+                        fprintf(output, "\n");
+                        break;
+                    }
+                    else {
+                        fprintf(output, "|");
+                    }
+                }
+                else if (result == eof) {
+                    fprintf(output, "success\n");
+                    break;
+                }
+                else {
+                    result = approve(db, parameter.user_id);
+                    if (result == not_found) {
+                        fprintf(output, "not-found|");
+                    }
+                    else {
+                        fprintf(output, "success|");
+                    }
+                }
+            }
+        }
+        
+        
         
         
         

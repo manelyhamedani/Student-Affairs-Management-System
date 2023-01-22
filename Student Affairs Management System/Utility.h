@@ -13,6 +13,12 @@ enum type {
     none, student, admin
 };
 
+enum result {
+  success, not_found, permission_denied, invalid, eof, eol
+};
+
+extern sqlite3 *db;
+
 extern struct _user {
     char username[30];
     char password[20];
@@ -22,6 +28,7 @@ extern struct _user {
 int user_login(const char *username, const char *password, sqlite3 *db);
 int user_logout(const char *username);
 int user_register(const char *name, const char *family, const char *user_id, const char *password, const char *national_id, const char *birthdate, const char *gender, const char *type, sqlite3 *db);
+int is_exists(sqlite3* db, const char *tbl_name, const char *id, const char *type);
 int create_table(sqlite3 *db, const char *tbl_name, const char *definition);
 int create_db(const char *db_name, sqlite3 **ppDB);
 

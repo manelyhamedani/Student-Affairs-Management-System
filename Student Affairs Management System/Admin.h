@@ -9,7 +9,6 @@
 #define Admin_h
 #include <sqlite3.h>
 
-int approve_admin(sqlite3 *db, const char *admin_id);
-int approve_student(sqlite3 *db, const char *student_id);
+int approve(sqlite3 *db, const char *user_id);
 
 #endif /* Admin_h */
