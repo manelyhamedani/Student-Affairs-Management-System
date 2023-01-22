@@ -19,10 +19,10 @@ static int callback(void *data, int argc, char **argv, char **col_name) {
     return 0;
 }
 
-int is_exists(sqlite3* db, const char *tbl_name, const char *id, const char *type) {
+int is_exists(sqlite3* db, const char *tbl_name, const char *user_id, const char *pass, const char *type) {
     char *errmsg = NULL;
     char sql[max_size];
-    sprintf(sql, "select exists(select * from %s where %s_id = '%s');", tbl_name, type, id);
+    sprintf(sql, "select exists(select * from %s where %s_id = '%s' and password = '%s');", tbl_name, type, user_id, pass);
     int exist = 0;
     int rc = sqlite3_exec(db, sql, callback, &exist, &errmsg);
     if (rc != SQLITE_OK) {
@@ -40,19 +40,18 @@ int user_login(const char *username, const char *password, sqlite3 *db) {
     if (current_user.user_type != none) {
         return permission_denied;
     }
-    if (is_exists(db, "STUDENTS", username, "student") == 1) {
+    if (is_exists(db, "STUDENTS", username, password, "student") == 1) {
         strcpy(current_user.username, username);
         strcpy(current_user.password, password);
         current_user.user_type = student;
         return success;
     }
-    if (is_exists(db, "ADMINS", username, "admin") == 1) {
+    if (is_exists(db, "ADMINS", username, password, "admin") == 1) {
         strcpy(current_user.username, username);
         strcpy(current_user.password, password);
         current_user.user_type = admin;
         return success;
     }
-    fprintf(stderr, "Incorrect username or password.\n");
     return not_found;
 }
 
@@ -63,7 +62,6 @@ int user_logout(const char *username) {
         current_user.user_type = none;
         return success;
     }
-    fprintf(stderr, "Incorrect username.\n");
     return not_found;
 }
 
@@ -71,16 +69,16 @@ int user_logout(const char *username) {
 int user_register(const char *name, const char *family, const char *user_id, const char *password, const char *national_id, const char *birthdate, const char *gender, const char *type, sqlite3 *db) {
     char sql[max_size];
     char *errmsg = NULL;
-    if (is_exists(db, "PENDING", user_id, "user") == 1) {
+    if (is_exists(db, "PENDING", user_id, password, "user") == 1) {
         return permission_denied;
     }
     if (strcmp(type, "student") == 0) {
-        if (is_exists(db, "STUDENTS", user_id, type) == 1) {
+        if (is_exists(db, "STUDENTS", user_id, password, type) == 1) {
             return permission_denied;
         }
     }
     else {
-        if (is_exists(db, "ADMINS", user_id, type) == 1) {
+        if (is_exists(db, "ADMINS", user_id, password, type) == 1) {
             return permission_denied;
         }
     }
@@ -93,6 +91,31 @@ int user_register(const char *name, const char *family, const char *user_id, con
     }
     return success;
 }
+
+int change_pass(const char *username, const char *old_pass, const char *new_pass) {
+    if (strcmp(current_user.username, username)) {
+        return not_found;
+    }
+    if (strcmp(current_user.password, old_pass)) {
+        return permission_denied;
+    }
+    char *errmsg = NULL;
+    char sql[max_size];
+    if (current_user.user_type == admin) {
+        sprintf(sql, "update ADMINS set password = '%s' where admin_id = '%s';", new_pass, username);
+    }
+    else {
+        sprintf(sql, "update STUDENTS set password = '%s' where student_id = '%s';", new_pass, username);
+    }
+    int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return -1;
+    }
+    return success;
+}
+
 
 int create_table(sqlite3 *db, const char *tbl_name, const char *definition) {
     char *errmsg = NULL;

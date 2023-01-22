@@ -14,9 +14,7 @@
 
 
 static int callback(void *data, int argc, char **argv, char **col_name) {
-    if (argc == 0) {
-        *((int *)data) = not_found;
-    }
+    *((int *)data) = success;
     char sql[max_size];
     int student_flag = 0;
     if (strcmp(argv[argc - 1], "admin") == 0) {
@@ -48,7 +46,7 @@ static int callback(void *data, int argc, char **argv, char **col_name) {
 int approve(sqlite3 *db, const char *user_id) {
     char *errmsg = NULL;
     char sql[max_size];
-    int exist = 0;
+    int exist = not_found;
     sprintf(sql, "select * from PENDING where user_id = '%s';", user_id);
     int rc = sqlite3_exec(db, sql, callback, &exist, &errmsg);
     if (rc != SQLITE_OK) {
@@ -56,15 +54,15 @@ int approve(sqlite3 *db, const char *user_id) {
         sqlite3_free(errmsg);
         return -1;
     }
+    if (exist == not_found) {
+        return not_found;
+    }
     sprintf(sql, "delete from PENDING where user_id = '%s';", user_id);
     rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
         return -1;
-    }
-    if (exist == not_found) {
-        return not_found;
     }
     return success;
 }

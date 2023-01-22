@@ -15,7 +15,7 @@
 #define true                    1
 #define max_size_command        30
 #define max_size_parameter      100
-#define max_size_paramater_name 30
+#define max_size_parameter_name 30
 
 typedef struct {
     char username[max_size_parameter];
@@ -41,28 +41,25 @@ typedef struct {
     char user_id[max_size_parameter];
 } approve_parameter;
 
+typedef struct {
+    char user_id[max_size_parameter];
+    char old_pass[max_size_parameter];
+    char new_pass[max_size_parameter];
+} change_pass_parameter;
+
 
 int get_login_parameter(FILE *input, login_parameter *parameter) {
-    char paramater_name[max_size_paramater_name];
+    char parameter_name[max_size_parameter_name];
     char colon;
     char separator;
     char end;
-    fscanf(input, "%[^:]%c", paramater_name, &colon);
-    if (strcmp(paramater_name, "user")) {
-        return invalid;
-    }
-    if (colon != ':') {
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "user")) {
         return invalid;
     }
     fscanf(input, "%[^|]", parameter->username);
-    fscanf(input, "%c%[^:]%c", &separator, paramater_name, &colon);
-    if (separator != '|') {
-        return invalid;
-    }
-    if (strcmp(paramater_name, "password")) {
-        return invalid;
-    }
-    if (colon != ':') {
+    fscanf(input, "%c%[^:]%c", &separator, parameter_name, &colon);
+    if (strcmp(parameter_name, "password")) {
         return invalid;
     }
     fscanf(input, "%s%c", parameter->password, &end);
@@ -76,14 +73,11 @@ int get_login_parameter(FILE *input, login_parameter *parameter) {
 }
 
 int get_logout_parameter(FILE *input, logout_parameter *parameter) {
-    char paramater_name[max_size_paramater_name];
+    char parameter_name[max_size_parameter_name];
     char colon;
     char end;
-    fscanf(input, "%[^:]%c", paramater_name, &colon);
-    if (strcmp(paramater_name, "user")) {
-        return invalid;
-    }
-    if (colon != ':') {
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "user")) {
         return invalid;
     }
     fscanf(input, "%s%c", parameter->username, &end);
@@ -97,92 +91,47 @@ int get_logout_parameter(FILE *input, logout_parameter *parameter) {
 }
 
 int get_register_parameter(FILE *input, register_parameter *parameter) {
-    char paramater_name[max_size_paramater_name];
+    char parameter_name[max_size_parameter_name];
     char colon;
     char separator;
     char end;
-    fscanf(input, "%[^:]%c", paramater_name, &colon);
-    if (strcmp(paramater_name, "name")) {
-        return invalid;
-    }
-    if (colon != ':') {
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "name")) {
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->name, &separator);
-    if (separator != '|') {
-        return invalid;
-    }
-    fscanf(input, "%[^:]%c", paramater_name, &colon);
-    if (strcmp(paramater_name, "family")) {
-        return invalid;
-    }
-    if (colon != ':') {
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "family")) {
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->family, &separator);
-    if (separator != '|') {
-        return invalid;
-    }
-    fscanf(input, "%[^:]%c", paramater_name, &colon);
-    if (strcmp(paramater_name, "user-id")) {
-        return invalid;
-    }
-    if (colon != ':') {
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "user-id")) {
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->user_id, &separator);
-    if (separator != '|') {
-        return invalid;
-    }
-    fscanf(input, "%[^:]%c", paramater_name, &colon);
-    if (strcmp(paramater_name, "password")) {
-        return invalid;
-    }
-    if (colon != ':') {
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "password")) {
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->password, &separator);
-    if (separator != '|') {
-        return invalid;
-    }
-    fscanf(input, "%[^:]%c", paramater_name, &colon);
-    if (strcmp(paramater_name, "national-id-code")) {
-        return invalid;
-    }
-    if (colon != ':') {
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "national-id-code")) {
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->national_id, &separator);
-    if (separator != '|') {
-        return invalid;
-    }
-    fscanf(input, "%[^:]%c", paramater_name, &colon);
-    if (strcmp(paramater_name, "birthdate")) {
-        return invalid;
-    }
-    if (colon != ':') {
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "birthdate")) {
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->birthdate, &separator);
-    if (separator != '|') {
-        return invalid;
-    }
-    fscanf(input, "%[^:]%c", paramater_name, &colon);
-    if (strcmp(paramater_name, "gender")) {
-        return invalid;
-    }
-    if (colon != ':') {
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "gender")) {
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->gender, &separator);
-    if (separator != '|') {
-        return invalid;
-    }
-    fscanf(input, "%[^:]%c", paramater_name, &colon);
-    if (strcmp(paramater_name, "type")) {
-        return invalid;
-    }
-    if (colon != ':') {
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "type")) {
         return invalid;
     }
     fscanf(input, "%s%c", parameter->type, &end);
@@ -196,29 +145,47 @@ int get_register_parameter(FILE *input, register_parameter *parameter) {
 }
 
 int get_approve_parameter(FILE *input, approve_parameter *parameter) {
-    char paramater_name[max_size_paramater_name];
+    char parameter_name[max_size_parameter_name];
     char colon;
     char separator;
-    fscanf(input, "%[^:]%c", paramater_name, &colon);
-    if (strcmp(paramater_name, "user")) {
-        return invalid;
-    }
-    if (colon != ':') {
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "user")) {
         return invalid;
     }
     fscanf(input, "%[^|]%c", parameter->user_id, &separator);
     if (feof(input)) {
+        // delete '\n' from the end of the last parameter
+        sscanf(parameter->user_id, "%s", parameter->user_id);
         return eof;
-    }
-    if (separator == '|') {
-        return success;
     }
     if (separator == '\n') {
         return eol;
     }
-    else {
+    else if (separator != '|') {
         return invalid;
     }
+    return success;
+}
+
+int get_change_pass_parameter(FILE *input, change_pass_parameter *parameter) {
+    char parameter_name[max_size_parameter_name];
+    char colon;
+    char separator;
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "user")) {
+        return invalid;
+    }
+    fscanf(input, "%[^|]%c", parameter->user_id, &separator);
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "old-pass")) {
+        return invalid;
+    }
+    fscanf(input, "%[^|]%c", parameter->old_pass, &separator);
+    fscanf(input, "%[^:]%c", parameter_name, &colon);
+    if (strcmp(parameter_name, "new-pass")) {
+        return invalid;
+    }
+    fscanf(input, "%s", parameter->new_pass);
     return success;
 }
 
@@ -255,6 +222,7 @@ void get_command(FILE *input, FILE *output) {
                     fprintf(output, "%d#success\n", command_id);
                 }
             }
+            continue;
         }
         
         if (strcmp(command, "logout") == 0) {
@@ -276,6 +244,7 @@ void get_command(FILE *input, FILE *output) {
                     fprintf(output, "%d#success\n", command_id);
                 }
             }
+            continue;
         }
         
         if (strcmp(command, "register") == 0) {
@@ -300,6 +269,7 @@ void get_command(FILE *input, FILE *output) {
             if (current_user.user_type == admin) {
                 approve(db, parameter.user_id);
             }
+            continue;
         }
         
         if (strcmp(command, "approve") == 0) {
@@ -324,7 +294,13 @@ void get_command(FILE *input, FILE *output) {
                     }
                 }
                 else if (result == eof) {
-                    fprintf(output, "success\n");
+                    result = approve(db, parameter.user_id);
+                    if (result == not_found) {
+                        fprintf(output, "not-found\n");
+                    }
+                    else {
+                        fprintf(output, "success\n");
+                    }
                     break;
                 }
                 else {
@@ -337,6 +313,28 @@ void get_command(FILE *input, FILE *output) {
                     }
                 }
             }
+            continue;
+        }
+        
+        if (strcmp(command, "change-pass") == 0) {
+            change_pass_parameter parameter;
+            result = get_change_pass_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = change_pass(parameter.user_id, parameter.old_pass, parameter.new_pass);
+                if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
         }
         
         
