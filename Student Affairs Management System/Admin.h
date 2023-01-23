@@ -7,7 +7,6 @@
 
 #ifndef Admin_h
 #define Admin_h
-#include <sqlite3.h>
 
 int approve(const char *user_id);
 int change_student_pass(const char *user_id, const char *new_pass);

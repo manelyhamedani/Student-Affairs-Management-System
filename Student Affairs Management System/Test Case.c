@@ -11,6 +11,7 @@
 #include <sqlite3.h>
 #include "Admin.h"
 #include <ctype.h>
+#include "Student.h"
 
 
 #define true                    1
@@ -107,6 +108,12 @@ typedef struct {
     char end_date[max_size_parameter];
 } poll_parameter;
 
+typedef struct {
+    char self_id[max_size_parameter];
+    char date[max_size_parameter];
+    char meal[max_size_parameter];
+    char food_id[max_size_parameter];
+} reserve_parameter;
 
 char parameter_name[max_size_parameter_name];
 char parameter_line[max_size_parameter];
@@ -368,6 +375,17 @@ int get_news_parameter(FILE *input, news_parameter *parameter) {
 int get_poll_parameter(FILE *input, poll_parameter *parameter) {
     fgets(parameter_line, max_size_parameter, input);
     if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->question, &symbol, parameter_name, &symbol, parameter->option1, &symbol, parameter_name, &symbol, parameter->option2, &symbol, parameter_name, &symbol, parameter->option3, &symbol, parameter_name, &symbol, parameter->option4, &symbol, parameter_name, &symbol, parameter->end_date) != 23) {
+        return invalid;
+    }
+    return success;
+}
+
+int get_reserve_parameter(FILE *input, reserve_parameter *parameter) {
+    fgets(parameter_line, max_size_parameter, input);
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->self_id, &symbol, parameter_name, &symbol, parameter->date, &symbol, parameter_name, &symbol, parameter->meal, &symbol, parameter_name, &symbol, parameter->food_id) != 15) {
+        return invalid;
+    }
+    if (strcmp(parameter->meal, "lunch") && strcmp(parameter->meal, "dinner")) {
         return invalid;
     }
     return success;
@@ -688,6 +706,27 @@ void get_command(FILE *input, FILE *output) {
             }
             else {
                 result = add_poll(parameter.question, parameter.option1, parameter.option2, parameter.option3, parameter.option4, parameter.end_date);
+                if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
+        
+        if (strcmp(command, "reserve") == 0) {
+            reserve_parameter parameter;
+            result = get_reserve_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = reserve(parameter.self_id, parameter.date, parameter.meal, parameter.food_id);
                 if (result == permission_denied) {
                     fprintf(output, "%d#permission-denied\n", command_id);
                 }

@@ -47,6 +47,9 @@ static int callback(void *data, int argc, char **argv, char **col_name) {
 }
 
 int approve(const char *user_id) {
+    if (current_user.user_type != admin) {
+        return permission_denied;
+    }
     char *errmsg = NULL;
     char sql[max_size];
     int exist = not_found;
