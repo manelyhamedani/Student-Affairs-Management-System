@@ -99,7 +99,11 @@ int create_my_tables(void) {
                     "OPTION_1    TEXT   NOT NULL, " \
                     "COUNT_1     INT    NOT NULL, " \
                     "OPTION_2    TEXT   NOT NULL, " \
-                    "COUNT_2     INT    NOT NULL ";
+                    "COUNT_2     INT    NOT NULL, " \
+                    "OPTION_3    TEXT, " \
+                    "COUNT_3     INT, " \
+                    "OPTION_4    TEXT, " \
+                    "COUNT_4     INT, ";
     
     if (create_table(db, admin_tbl, admin_def) != 0) {
         return -1;

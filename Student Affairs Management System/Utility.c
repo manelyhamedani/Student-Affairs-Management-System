@@ -95,7 +95,7 @@ int user_register(const char *name, const char *family, const char *user_id, con
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
-        return -1;
+        return permission_denied;
     }
     return success;
 }
@@ -119,7 +119,7 @@ int change_pass(const char *username, const char *old_pass, const char *new_pass
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
-        return -1;
+        return permission_denied;
     }
     return success;
 }
@@ -133,7 +133,7 @@ int create_table(sqlite3 *db, const char *tbl_name, const char *definition) {
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
-        return -1;
+        return permission_denied;
     }
     return 0;
 }
@@ -144,7 +144,7 @@ int create_db(const char *db_name, sqlite3 **ppDB) {
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
-        return -1;
+        return permission_denied;
     }
     return 0;
 }

@@ -87,6 +87,26 @@ typedef struct {
     char count[max_size_parameter];
 } meal_plan_parameter;
 
+typedef struct {
+    char user_id[max_size_parameter];
+    char amount[max_size_parameter];
+} charge_student_account_parameter;
+
+typedef struct {
+    char title[max_size_parameter];
+    char content[max_size_parameter];
+    char end_date[max_size_parameter];
+} news_parameter;
+
+typedef struct {
+    char question[max_size_parameter];
+    char option1[max_size_parameter];
+    char option2[max_size_parameter];
+    char option3[max_size_parameter];
+    char option4[max_size_parameter];
+    char end_date[max_size_parameter];
+} poll_parameter;
+
 
 char parameter_name[max_size_parameter_name];
 char parameter_line[max_size_parameter];
@@ -213,6 +233,11 @@ int get_self_parameter(FILE *input, self_parameter *parameter) {
     if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->self_id, &symbol, parameter_name, &symbol, parameter->name, &symbol, parameter_name, &symbol, parameter->location, &symbol, parameter_name, &symbol, parameter->capacity, &symbol, parameter_name, &symbol, parameter->type, &symbol, parameter_name, &symbol, parameter->meal, &symbol, parameter_name, &symbol, parameter->lunch_time, &symbol, parameter_name, &symbol, parameter->dinner_time) != 31) {
         return invalid;
     }
+    char condition[max_size_parameter];
+    sprintf(condition, "where self_id = '%s", parameter->self_id);
+    if (is_exists("SELF", condition) == 1) {
+        return invalid;
+    }
     int lunch_hour1, lunch_minute1, dinner_hour1, dinner_minute1, lunch_hour2, lunch_minute2, dinner_hour2, dinner_minute2;
     
     lunch_hour1 = (parameter->lunch_time[0] - '0') * 10 + (parameter->lunch_time[1] - '0');
@@ -305,6 +330,11 @@ int get_food_parameter(FILE *input, food_parameter *parameter) {
     if (strcmp(parameter->type, "food") && strcmp(parameter->type, "dessert")) {
         return invalid;
     }
+    char condition[max_size_parameter];
+    sprintf(condition, "where food_id = '%s", parameter->food_id);
+    if (is_exists("FOOD", condition) == 1) {
+        return invalid;
+    }
     return success;
 }
 
@@ -314,6 +344,30 @@ int get_meal_plan_parameter(FILE *input, meal_plan_parameter *parameter) {
         return invalid;
     }
     if (strcmp(parameter->type, "lunch") && strcmp(parameter->type, "dinner") && strcmp(parameter->type, "both")) {
+        return invalid;
+    }
+    return success;
+}
+
+int get_charge_student_account(FILE *input, charge_student_account_parameter *parameter) {
+    fgets(parameter_line, max_size_parameter, input);
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->user_id, &symbol, parameter_name, &symbol, parameter->amount) != 7) {
+        return invalid;
+    }
+    return success;
+}
+
+int get_news_parameter(FILE *input, news_parameter *parameter) {
+    fgets(parameter_line, max_size_parameter, input);
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->title, &symbol, parameter_name, &symbol, parameter->content, &symbol, parameter_name, &symbol, parameter->end_date) != 11) {
+        return invalid;
+    }
+    return success;
+}
+
+int get_poll_parameter(FILE *input, poll_parameter *parameter) {
+    fgets(parameter_line, max_size_parameter, input);
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->question, &symbol, parameter_name, &symbol, parameter->option1, &symbol, parameter_name, &symbol, parameter->option2, &symbol, parameter_name, &symbol, parameter->option3, &symbol, parameter_name, &symbol, parameter->option4, &symbol, parameter_name, &symbol, parameter->end_date) != 23) {
         return invalid;
     }
     return success;
@@ -361,6 +415,9 @@ void get_command(FILE *input, FILE *output) {
                 result = user_logout(parameter.username);
                 if (result == not_found) {
                     fprintf(output, "%d#not-found\n", command_id);
+                }
+                else if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
                 }
                 else {
                     fprintf(output, "%d#success\n", command_id);
@@ -416,6 +473,9 @@ void get_command(FILE *input, FILE *output) {
                     if (result == not_found) {
                         fprintf(output, "not-found\n");
                     }
+                    else if (result == permission_denied) {
+                        fprintf(output, "%d#permission-denied\n", command_id);
+                    }
                     else {
                         fprintf(output, "success\n");
                     }
@@ -425,6 +485,9 @@ void get_command(FILE *input, FILE *output) {
                     result = approve(parameter.user_id);
                     if (result == not_found) {
                         fprintf(output, "not-found|");
+                    }
+                    else if (result == permission_denied) {
+                        fprintf(output, "%d#permission-denied\n", command_id);
                     }
                     else {
                         fprintf(output, "success|");
@@ -575,6 +638,68 @@ void get_command(FILE *input, FILE *output) {
             continue;
         }
         
+        if (strcmp(command, "charge-student-account") == 0) {
+            charge_student_account_parameter parameter;
+            result = get_charge_student_account(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = charge_student_account(parameter.user_id, parameter.amount);
+                if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
+        
+        if (strcmp(command, "add-news") == 0) {
+            news_parameter parameter;
+            result = get_news_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = add_news(parameter.title, parameter.content, parameter.end_date);
+                if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
+        
+        if (strcmp(command, "add-poll") == 0) {
+            poll_parameter parameter;
+            result = get_poll_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = add_poll(parameter.question, parameter.option1, parameter.option2, parameter.option3, parameter.option4, parameter.end_date);
+                if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
         
         
     }
