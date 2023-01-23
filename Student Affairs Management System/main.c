@@ -150,9 +150,11 @@ int main(int argc, const char * argv[]) {
         puts("Cannot create tables!");
         return -1;
     }
+    current_user.user_type = none;
     FILE *input = fopen("input.txt", "r");
     FILE *output = fopen("output.txt", "w");
     get_command(input, output);
+//
 //    char test_case_flag;
 //    puts("Do you wanna open test-case file? (y or n)");
 //    scanf("%c", &test_case_flag);

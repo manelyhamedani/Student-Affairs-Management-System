@@ -14,7 +14,7 @@ enum type {
 };
 
 enum result {
-  success, not_found, permission_denied, invalid, eof, eol
+  success, not_found, permission_denied, invalid, end_of_line, end_of_file
 };
 
 extern sqlite3 *db;
@@ -29,7 +29,7 @@ int user_login(const char *username, const char *password);
 int user_logout(const char *username);
 int user_register(const char *name, const char *family, const char *user_id, const char *password, const char *national_id, const char *birthdate, const char *gender, const char *type);
 int change_pass(const char *username, const char *old_pass, const char *new_pass);
-int is_exists(const char *tbl_name, const char *user_id, const char *pass, const char *type);
+int is_exists(const char *tbl_name, const char *user_id, const char *pass, const char *type, int check_activity);
 int create_table(sqlite3 *db, const char *tbl_name, const char *definition);
 int create_db(const char *db_name, sqlite3 **ppDB);
 

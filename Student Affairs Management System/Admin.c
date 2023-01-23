@@ -71,7 +71,7 @@ int change_student_pass(const char *user_id, const char *new_pass) {
     if (current_user.user_type != admin) {
         return permission_denied;
     }
-    if (is_exists("STUDENTS", user_id, NULL, "student") != 1) {
+    if (is_exists("STUDENTS", user_id, NULL, "student", 1) != 1) {
         return not_found;
     }
     char *errmsg = NULL;
@@ -90,7 +90,7 @@ int remove_student(const char *user_id) {
     if (current_user.user_type != admin) {
         return permission_denied;
     }
-    if (is_exists("STUDENTS", user_id, NULL, "student") != 1) {
+    if (is_exists("STUDENTS", user_id, NULL, "student", 0) != 1) {
         return not_found;
     }
     char *errmsg = NULL;
@@ -109,7 +109,7 @@ int deactivate(const char *user_id) {
     if (current_user.user_type != admin) {
         return permission_denied;
     }
-    if (is_exists("STUDENTS", user_id, NULL, "student") != 1) {
+    if (is_exists("STUDENTS", user_id, NULL, "student", 0) != 1) {
         return not_found;
     }
     char *errmsg = NULL;
@@ -139,6 +139,23 @@ int define_self(const char *self_id, const char *name, const char *location, con
     }
     return success;
 }
+
+int define_food(const char *food_id, const char *name, const char *type, const char *price) {
+    if (current_user.user_type != admin) {
+        return permission_denied;
+    }
+    char *errmsg = NULL;
+    char sql[max_size];
+    sprintf(sql, "insert into FOOD values(%s, '%s', '%s', %s);", food_id, name, type, price);
+    int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return -1;
+    }
+    return success;
+}
+
 
 
 
