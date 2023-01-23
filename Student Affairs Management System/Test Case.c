@@ -70,14 +70,22 @@ typedef struct {
     char meal[max_size_parameter];
     char lunch_time[max_size_parameter];
     char dinner_time[max_size_parameter];
-} define_self_parameter;
+} self_parameter;
 
 typedef struct {
     char food_id[max_size_parameter];
     char name[max_size_parameter];
     char type[max_size_parameter];
     char price[max_size_parameter];
-} define_food_parameter;
+} food_parameter;
+
+typedef struct {
+    char self_id[max_size_parameter];
+    char date[max_size_parameter];
+    char type[max_size_parameter];
+    char food_id[max_size_parameter];
+    char count[max_size_parameter];
+} meal_plan_parameter;
 
 
 char parameter_name[max_size_parameter_name];
@@ -200,7 +208,7 @@ int get_deactivate_parameter(FILE *input, deactivate_parameter *parameter) {
     return success;
 }
 
-int get_define_self_parameter(FILE *input, define_self_parameter *parameter) {
+int get_self_parameter(FILE *input, self_parameter *parameter) {
     fgets(parameter_line, max_size_parameter, input);
     if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->self_id, &symbol, parameter_name, &symbol, parameter->name, &symbol, parameter_name, &symbol, parameter->location, &symbol, parameter_name, &symbol, parameter->capacity, &symbol, parameter_name, &symbol, parameter->type, &symbol, parameter_name, &symbol, parameter->meal, &symbol, parameter_name, &symbol, parameter->lunch_time, &symbol, parameter_name, &symbol, parameter->dinner_time) != 31) {
         return invalid;
@@ -289,12 +297,23 @@ int get_define_self_parameter(FILE *input, define_self_parameter *parameter) {
     return success;
 }
 
-int get_define_food_parameter(FILE *input, define_food_parameter *parameter) {
+int get_food_parameter(FILE *input, food_parameter *parameter) {
     fgets(parameter_line, max_size_parameter, input);
     if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->food_id, &symbol, parameter_name, &symbol, parameter->name, &symbol, parameter_name, &symbol, parameter->type, &symbol, parameter_name, &symbol, parameter->price) != 15) {
         return invalid;
     }
     if (strcmp(parameter->type, "food") && strcmp(parameter->type, "dessert")) {
+        return invalid;
+    }
+    return success;
+}
+
+int get_meal_plan_parameter(FILE *input, meal_plan_parameter *parameter) {
+    fgets(parameter_line, max_size_parameter, input);
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->self_id, &symbol, parameter_name, &symbol, parameter->date, &symbol, parameter_name, &symbol, parameter->type, &symbol, parameter_name, &symbol, parameter->food_id, &symbol, parameter_name, &symbol, parameter->count) != 19) {
+        return invalid;
+    }
+    if (strcmp(parameter->type, "lunch") && strcmp(parameter->type, "dinner") && strcmp(parameter->type, "both")) {
         return invalid;
     }
     return success;
@@ -500,8 +519,8 @@ void get_command(FILE *input, FILE *output) {
         }
         
         if (strcmp(command, "define-self") == 0) {
-            define_self_parameter parameter;
-            result = get_define_self_parameter(input, &parameter);
+            self_parameter parameter;
+            result = get_self_parameter(input, &parameter);
             if (result == invalid) {
                 fprintf(output, "%d#invalid\n", command_id);
             }
@@ -518,8 +537,8 @@ void get_command(FILE *input, FILE *output) {
         }
         
         if (strcmp(command, "define-food") == 0) {
-            define_food_parameter parameter;
-            result = get_define_food_parameter(input, &parameter);
+            food_parameter parameter;
+            result = get_food_parameter(input, &parameter);
             if (result == invalid) {
                 fprintf(output, "%d#invalid\n", command_id);
             }
@@ -534,6 +553,29 @@ void get_command(FILE *input, FILE *output) {
             }
             continue;
         }
+        
+        if (strcmp(command, "define-meal-plan") == 0) {
+            meal_plan_parameter parameter;
+            result = get_meal_plan_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = define_meal_plan(parameter.self_id, parameter.date, parameter.type, parameter.food_id, parameter.count);
+                if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
+        
+        
         
     }
     

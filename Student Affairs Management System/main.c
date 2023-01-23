@@ -176,6 +176,8 @@ int main(int argc, const char * argv[]) {
 //            return -1;
 //        }
 //        get_command(input, output);
+    //    fclose(input);
+    //    fclose(output);
 //    }
 //    else {
 //

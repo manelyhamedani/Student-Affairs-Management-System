@@ -12,6 +12,7 @@
 
 #define max_size    500
 
+int meal_plan_id = 1;
 
 static int callback(void *data, int argc, char **argv, char **col_name) {
     *((int *)data) = success;
@@ -71,7 +72,9 @@ int change_student_pass(const char *user_id, const char *new_pass) {
     if (current_user.user_type != admin) {
         return permission_denied;
     }
-    if (is_exists("STUDENTS", user_id, NULL, "student", 1) != 1) {
+    char condition[max_size];
+    sprintf(condition, "where student_id = '%s' and activate = 1", user_id);
+    if (is_exists("STUDENTS", condition) != 1) {
         return not_found;
     }
     char *errmsg = NULL;
@@ -90,7 +93,9 @@ int remove_student(const char *user_id) {
     if (current_user.user_type != admin) {
         return permission_denied;
     }
-    if (is_exists("STUDENTS", user_id, NULL, "student", 0) != 1) {
+    char condition[max_size];
+    sprintf(condition, "where student_id = '%s' ", user_id);
+    if (is_exists("STUDENTS", condition) != 1) {
         return not_found;
     }
     char *errmsg = NULL;
@@ -109,7 +114,9 @@ int deactivate(const char *user_id) {
     if (current_user.user_type != admin) {
         return permission_denied;
     }
-    if (is_exists("STUDENTS", user_id, NULL, "student", 0) != 1) {
+    char condition[max_size];
+    sprintf(condition, "where student_id = '%s' ", user_id);
+    if (is_exists("STUDENTS", condition) != 1) {
         return not_found;
     }
     char *errmsg = NULL;
@@ -155,6 +162,33 @@ int define_food(const char *food_id, const char *name, const char *type, const c
     }
     return success;
 }
+
+int define_meal_plan(const char *self_id, const char *date, const char *type, const char *food_id, const char *count) {
+    if (current_user.user_type != admin) {
+        return permission_denied;
+    }
+    char condition[max_size];
+    sprintf(condition, "where self_id = '%s' and (meal = '%s' or meal = 'both') ", self_id, type);
+    if (is_exists("SELF", condition) != 1) {
+        return not_found;
+    }
+    sprintf(condition, "where food_id = '%s' ", food_id);
+    if (is_exists("FOOD", condition) != 1) {
+        return not_found;
+    }
+    char *errmsg = NULL;
+    char sql[max_size];
+    sprintf(sql, "insert into MEAL_PLAN values(%d, %s, %s, '%s', '%s', %s);", meal_plan_id, self_id, food_id, date, type, count);
+    int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return -1;
+    }
+    ++meal_plan_id;
+    return success;
+}
+
 
 
 
