@@ -30,6 +30,12 @@ extern struct _user {
     enum type user_type;
 } current_user;
 
+extern int ID[5];
+
+enum ID {
+    meal_plan_id, news_id, poll_id, reserved_meal_id, taken_meal_id
+};
+
 int user_login(const char *username, const char *password);
 int user_logout(const char *username);
 int user_register(const char *name, const char *family, const char *user_id, const char *password, const char *national_id, const char *birthdate, const char *gender, const char *type);

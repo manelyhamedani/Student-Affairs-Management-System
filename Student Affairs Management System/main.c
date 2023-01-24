@@ -11,6 +11,7 @@
 #include "Test Case.h"
 #include <string.h>
 
+#define max_size    500
 #define max_size_filename   100
 
 typedef struct _date_time date_time;
@@ -52,8 +53,10 @@ int create_my_tables(void) {
                         "CAPACITY       INT     NOT NULL, " \
                         "TYPE           TEXT    NOT NULL, " \
                         "MEAL           TEXT    NOT NULL, " \
-                        "LUNCH_TIME     TEXT, " \
-                        "DINNER_TIME    TEXT ";
+                        "LUNCH_TIME_START     INT   NOT NULL, " \
+                        "LUNCH_TIME_END       INT   NOT NULL, " \
+                        "DINNER_TIME_START    INT   NOT NULL, " \
+                        "DINNER_TIME_END      INT   NOT NULL ";
     char *food_tbl = "FOOD";
     char *food_def = "FOOD_ID           INT     PRIMARY KEY     NOT NULL, " \
                         "NAME           TEXT    NOT NULL, " \
@@ -147,7 +150,7 @@ int create_my_tables(void) {
     return 0;
 }
 
-static int callback(void *data, int argc, char **argv, char **col_name) {
+static int set_date_callback(void *data, int argc, char **argv, char **col_name) {
     sscanf(argv[0], "%s%s", ((date_time *)data)->date, ((date_time *)data)->time);
     return 0;
 }
@@ -155,7 +158,32 @@ static int callback(void *data, int argc, char **argv, char **col_name) {
 void set_date_time(void) {
     char *errmsg = NULL;
     char *sql = "select strftime('%Y-%m-%d %H%M', 'now');";
-    int rc = sqlite3_exec(db, sql, callback, &current_date_time, &errmsg);
+    int rc = sqlite3_exec(db, sql, set_date_callback, &current_date_time, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+    }
+}
+
+static int set_id_callback(void *data, int argc, char **argv, char **col_name) {
+    static int counter = 0;
+    if (argv[0] == NULL) {
+        return 0;
+    }
+    sscanf(argv[0], "%d", &(((int *)data)[counter]));
+    ++(((int *)data)[counter]);
+    ++counter;
+    return 0;
+}
+
+void set_id(void) {
+    char *errmsg = NULL;
+    char *sql = "select max(meal_plan_id) from MEAL_PLAN;" \
+                "select max(news_id) from NEWS;" \
+                "select max(poll_id) from POLL;" \
+                "select max(reserved_meal_id) from RESERVED_MEAL;" \
+                "select max(taken_meal_id) from TAKEN_MEAL;";
+    int rc = sqlite3_exec(db, sql, set_id_callback, ID, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
@@ -174,6 +202,7 @@ int main(int argc, const char * argv[]) {
     }
     current_user.user_type = none;
     set_date_time();
+    set_id();
     FILE *input = fopen("input.txt", "r");
     FILE *output = fopen("output.txt", "w");
     get_command(input, output);

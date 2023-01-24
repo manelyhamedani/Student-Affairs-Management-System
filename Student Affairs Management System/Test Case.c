@@ -69,8 +69,10 @@ typedef struct {
     char capacity[max_size_parameter];
     char type[max_size_parameter];
     char meal[max_size_parameter];
-    char lunch_time[max_size_parameter];
-    char dinner_time[max_size_parameter];
+    char lunch_time_start[max_size_parameter];
+    char lunch_time_end[max_size_parameter];
+    char dinner_time_start[max_size_parameter];
+    char dinner_time_end[max_size_parameter];
 } self_parameter;
 
 typedef struct {
@@ -114,6 +116,12 @@ typedef struct {
     char meal[max_size_parameter];
     char food_id[max_size_parameter];
 } reserve_parameter;
+
+typedef struct {
+    char self_id[max_size_parameter];
+    char date[max_size_parameter];
+    char meal[max_size_parameter];
+} take_food_parameter;
 
 char parameter_name[max_size_parameter_name];
 char parameter_line[max_size_parameter];
@@ -237,85 +245,85 @@ int get_deactivate_parameter(FILE *input, deactivate_parameter *parameter) {
 
 int get_self_parameter(FILE *input, self_parameter *parameter) {
     fgets(parameter_line, max_size_parameter, input);
-    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->self_id, &symbol, parameter_name, &symbol, parameter->name, &symbol, parameter_name, &symbol, parameter->location, &symbol, parameter_name, &symbol, parameter->capacity, &symbol, parameter_name, &symbol, parameter->type, &symbol, parameter_name, &symbol, parameter->meal, &symbol, parameter_name, &symbol, parameter->lunch_time, &symbol, parameter_name, &symbol, parameter->dinner_time) != 31) {
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^-]%c%[^|]%c%[^:]%c%[^-]%c%s", parameter_name, &symbol, parameter->self_id, &symbol, parameter_name, &symbol, parameter->name, &symbol, parameter_name, &symbol, parameter->location, &symbol, parameter_name, &symbol, parameter->capacity, &symbol, parameter_name, &symbol, parameter->type, &symbol, parameter_name, &symbol, parameter->meal, &symbol, parameter_name, &symbol, parameter->lunch_time_start, &symbol, parameter->lunch_time_end, &symbol, parameter_name, &symbol, parameter->dinner_time_start, &symbol, parameter->dinner_time_end) != 35) {
         return invalid;
     }
     char condition[max_size_parameter];
-    sprintf(condition, "where self_id = '%s", parameter->self_id);
+    sprintf(condition, "where self_id = %s", parameter->self_id);
     if (is_exists("SELF", condition) == 1) {
         return invalid;
     }
-    int lunch_hour1, lunch_minute1, dinner_hour1, dinner_minute1, lunch_hour2, lunch_minute2, dinner_hour2, dinner_minute2;
+    int lunch_start_hour, lunch_start_minute, dinner_start_hour, dinner_start_minute, lunch_end_hour, lunch_end_minute, dinner_end_hour, dinner_end_minute;
     
-    lunch_hour1 = (parameter->lunch_time[0] - '0') * 10 + (parameter->lunch_time[1] - '0');
-    lunch_minute1 = (parameter->lunch_time[2] - '0') * 10 + (parameter->lunch_time[3] - '0');
+    lunch_start_hour = (parameter->lunch_time_start[0] - '0') * 10 + (parameter->lunch_time_start[1] - '0');
+    lunch_start_minute = (parameter->lunch_time_start[2] - '0') * 10 + (parameter->lunch_time_start[3] - '0');
     
-    lunch_hour2 = (parameter->lunch_time[5] - '0') * 10 + (parameter->lunch_time[6] - '0');
-    lunch_minute2 = (parameter->lunch_time[7] - '0') * 10 + (parameter->lunch_time[8] - '0');
+    lunch_end_hour = (parameter->lunch_time_end[0] - '0') * 10 + (parameter->lunch_time_end[1] - '0');
+    lunch_end_minute = (parameter->lunch_time_end[2] - '0') * 10 + (parameter->lunch_time_end[3] - '0');
     
-    dinner_hour1 = (parameter->dinner_time[0] - '0') * 10 + (parameter->dinner_time[1] - '0');
-    dinner_minute1 = (parameter->dinner_time[2] - '0') * 10 + (parameter->dinner_time[3] - '0');
+    dinner_start_hour = (parameter->dinner_time_start[0] - '0') * 10 + (parameter->dinner_time_start[1] - '0');
+    dinner_start_minute = (parameter->dinner_time_start[2] - '0') * 10 + (parameter->dinner_time_start[3] - '0');
     
-    dinner_hour2 = (parameter->dinner_time[5] - '0') * 10 + (parameter->dinner_time[6] - '0');
-    dinner_minute2 = (parameter->dinner_time[7] - '0') * 10 + (parameter->dinner_time[8] - '0');
+    dinner_end_hour = (parameter->dinner_time_end[0] - '0') * 10 + (parameter->dinner_time_end[1] - '0');
+    dinner_end_minute = (parameter->dinner_time_end[2] - '0') * 10 + (parameter->dinner_time_end[3] - '0');
     
     if (strcmp(parameter->meal, "lunch") == 0) {
-        if (dinner_hour1 != 0 || dinner_minute1 != 0 || dinner_hour2 != 0 || dinner_minute2 != 0) {
+        if (dinner_start_hour != 0 || dinner_start_minute != 0 || dinner_end_hour != 0 || dinner_end_minute != 0) {
             return invalid;
         }
-        if (!(lunch_hour1 >= 0 && lunch_hour1 < 24)) {
+        if (!(lunch_start_hour >= 0 && lunch_start_hour < 24)) {
             return invalid;
         }
-        if (!(lunch_minute1 >= 0 && lunch_minute1 < 60)) {
+        if (!(lunch_start_minute >= 0 && lunch_start_minute < 60)) {
             return invalid;
         }
-        if (!(lunch_hour2 >= 0 && lunch_hour2 < 24)) {
+        if (!(lunch_end_hour >= 0 && lunch_end_hour < 24)) {
             return invalid;
         }
-        if (!(lunch_minute2 >= 0 && lunch_minute2 < 60)) {
+        if (!(lunch_end_minute >= 0 && lunch_end_minute < 60)) {
             return invalid;
         }
     }
     else if (strcmp(parameter->meal, "dinner") == 0) {
-        if (lunch_hour1 != 0 || lunch_minute1 != 0 || lunch_hour2 != 0 || lunch_minute2 != 0) {
+        if (lunch_start_hour != 0 || lunch_start_minute != 0 || lunch_end_hour != 0 || lunch_end_minute != 0) {
             return invalid;
         }
-        if (!(dinner_hour1 >= 0 && dinner_hour1 < 24)) {
+        if (!(dinner_start_hour >= 0 && dinner_start_hour < 24)) {
             return invalid;
         }
-        if (!(dinner_minute1 >= 0 && dinner_minute1 < 60)) {
+        if (!(dinner_start_minute >= 0 && dinner_start_minute < 60)) {
             return invalid;
         }
-        if (!(dinner_hour2 >= 0 && dinner_hour2 < 24)) {
+        if (!(dinner_end_hour >= 0 && dinner_end_hour < 24)) {
             return invalid;
         }
-        if (!(dinner_minute2 >= 0 && dinner_minute2 < 60)) {
+        if (!(dinner_end_minute >= 0 && dinner_end_minute < 60)) {
             return invalid;
         }
     }
     else if (strcmp(parameter->meal, "both") == 0) {
-        if (!(dinner_hour1 >= 0 && dinner_hour1 < 24)) {
+        if (!(dinner_start_hour >= 0 && dinner_start_hour < 24)) {
             return invalid;
         }
-        if (!(dinner_minute1 >= 0 && dinner_minute1 < 60)) {
+        if (!(dinner_start_minute >= 0 && dinner_start_minute < 60)) {
             return invalid;
         }
-        if (!(dinner_hour2 >= 0 && dinner_hour2 < 24)) {
+        if (!(dinner_end_hour >= 0 && dinner_end_hour < 24)) {
             return invalid;
         }
-        if (!(dinner_minute2 >= 0 && dinner_minute2 < 60)) {
+        if (!(dinner_end_minute >= 0 && dinner_end_minute < 60)) {
             return invalid;
         }
-        if (!(lunch_hour1 >= 0 && lunch_hour1 < 24)) {
+        if (!(lunch_start_hour >= 0 && lunch_start_hour < 24)) {
             return invalid;
         }
-        if (!(lunch_minute1 >= 0 && lunch_minute1 < 60)) {
+        if (!(lunch_start_minute >= 0 && lunch_start_minute < 60)) {
             return invalid;
         }
-        if (!(lunch_hour2 >= 0 && lunch_hour2 < 24)) {
+        if (!(lunch_end_hour >= 0 && lunch_end_hour < 24)) {
             return invalid;
         }
-        if (!(lunch_minute2 >= 0 && lunch_minute2 < 60)) {
+        if (!(lunch_end_minute >= 0 && lunch_end_minute < 60)) {
             return invalid;
         }
         
@@ -338,7 +346,7 @@ int get_food_parameter(FILE *input, food_parameter *parameter) {
         return invalid;
     }
     char condition[max_size_parameter];
-    sprintf(condition, "where food_id = '%s", parameter->food_id);
+    sprintf(condition, "where food_id = %s", parameter->food_id);
     if (is_exists("FOOD", condition) == 1) {
         return invalid;
     }
@@ -383,6 +391,17 @@ int get_poll_parameter(FILE *input, poll_parameter *parameter) {
 int get_reserve_parameter(FILE *input, reserve_parameter *parameter) {
     fgets(parameter_line, max_size_parameter, input);
     if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->self_id, &symbol, parameter_name, &symbol, parameter->date, &symbol, parameter_name, &symbol, parameter->meal, &symbol, parameter_name, &symbol, parameter->food_id) != 15) {
+        return invalid;
+    }
+    if (strcmp(parameter->meal, "lunch") && strcmp(parameter->meal, "dinner")) {
+        return invalid;
+    }
+    return success;
+}
+
+int get_take_food_parameter(FILE *input, take_food_parameter *parameter) {
+    fgets(parameter_line, max_size_parameter, input);
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->self_id, &symbol, parameter_name, &symbol, parameter->date, &symbol, parameter_name, &symbol, parameter->meal) != 11) {
         return invalid;
     }
     if (strcmp(parameter->meal, "lunch") && strcmp(parameter->meal, "dinner")) {
@@ -606,7 +625,7 @@ void get_command(FILE *input, FILE *output) {
                 fprintf(output, "%d#invalid\n", command_id);
             }
             else {
-                result = define_self(parameter.self_id, parameter.name, parameter.location, parameter.capacity, parameter.type, parameter.meal, parameter.lunch_time, parameter.dinner_time);
+                result = define_self(parameter.self_id, parameter.name, parameter.location, parameter.capacity, parameter.type, parameter.meal, parameter.lunch_time_start, parameter.lunch_time_end, parameter.dinner_time_start, parameter.dinner_time_end);
                 if (result == permission_denied) {
                     fprintf(output, "%d#permission-denied\n", command_id);
                 }
@@ -735,6 +754,27 @@ void get_command(FILE *input, FILE *output) {
                 }
                 else if (result == insufficient_money) {
                     fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
+        
+        if (strcmp(command, "take-food") == 0) {
+            take_food_parameter parameter;
+            result = get_take_food_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = take_food(parameter.self_id, parameter.date, parameter.meal);
+                if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
                 }
                 else {
                     fprintf(output, "%d#success\n", command_id);

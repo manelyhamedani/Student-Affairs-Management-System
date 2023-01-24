@@ -13,6 +13,8 @@ struct _user current_user;
 struct _date_time current_date_time;
 #define max_size    500
 
+int ID[5];
+
 static int callback(void *data, int argc, char **argv, char **col_name) {
     if (strcmp(argv[0], "1") == 0) {
         *((int *)data) = 1;

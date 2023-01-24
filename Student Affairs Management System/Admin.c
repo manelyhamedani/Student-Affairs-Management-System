@@ -12,9 +12,9 @@
 
 #define max_size    500
 
-int meal_plan_id = 1;
-int news_id = 1;
-int poll_id = 1;
+
+
+
 
 static int callback(void *data, int argc, char **argv, char **col_name) {
     *((int *)data) = success;
@@ -148,13 +148,13 @@ int deactivate(const char *user_id) {
     return success;
 }
 
-int define_self(const char *self_id, const char *name, const char *location, const char *capacity, const char *type, const char *meal, const char *lunch_time, const char *dinner_time) {
+int define_self(const char *self_id, const char *name, const char *location, const char *capacity, const char *type, const char *meal, const char *lunch_time_start, const char *lunch_time_end, const char *dinner_time_start, const char *dinner_time_end) {
     if (current_user.user_type != admin) {
         return permission_denied;
     }
     char *errmsg = NULL;
     char sql[max_size];
-    sprintf(sql, "insert into SELF values(%s, '%s', '%s', %s, '%s', '%s', '%s', '%s');", self_id, name, location, capacity, type, meal, lunch_time, dinner_time);
+    sprintf(sql, "insert into SELF values(%s, '%s', '%s', %s, '%s', '%s', %s, %s, %s, %s);", self_id, name, location, capacity, type, meal, lunch_time_start, lunch_time_end, dinner_time_start, dinner_time_end);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
@@ -185,24 +185,24 @@ int define_meal_plan(const char *self_id, const char *date, const char *type, co
         return permission_denied;
     }
     char condition[max_size];
-    sprintf(condition, "where self_id = '%s' and (meal = '%s' or meal = 'both') ", self_id, type);
+    sprintf(condition, "where self_id = %s and (meal = '%s' or meal = 'both') ", self_id, type);
     if (is_exists("SELF", condition) != 1) {
         return not_found;
     }
-    sprintf(condition, "where food_id = '%s' ", food_id);
+    sprintf(condition, "where food_id = %s ", food_id);
     if (is_exists("FOOD", condition) != 1) {
         return not_found;
     }
     char *errmsg = NULL;
     char sql[max_size];
-    sprintf(sql, "insert into MEAL_PLAN values(%d, %s, %s, '%s', '%s', %s);", meal_plan_id, self_id, food_id, date, type, count);
+    sprintf(sql, "insert into MEAL_PLAN values(%d, %s, %s, '%s', '%s', %s);", ID[meal_plan_id], self_id, food_id, date, type, count);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
         return permission_denied;
     }
-    ++meal_plan_id;
+    ++ID[meal_plan_id];
     return success;
 }
 
@@ -233,14 +233,14 @@ int add_news(const char *title, const char *content, const char *end_date) {
     }
     char *errmsg = NULL;
     char sql[max_size];
-    sprintf(sql, "insert into NEWS values(%d, '%s', '%s', '%s');", news_id, title, content, end_date);
+    sprintf(sql, "insert into NEWS values(%d, '%s', '%s', '%s');", ID[news_id], title, content, end_date);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
         return permission_denied;
     }
-    ++news_id;
+    ++ID[news_id];
     return success;
 }
 
@@ -250,14 +250,14 @@ int add_poll(const char *question, const char *option1, const char *option2, con
     }
     char *errmsg = NULL;
     char sql[max_size];
-    sprintf(sql, "insert into POLL values(%d, '%s', '%s', '%s', %d, '%s', %d, '%s', %d, '%s', %d);", poll_id, end_date, question, option1, 0, option2, 0, option3, 0, option4, 0);
+    sprintf(sql, "insert into POLL values(%d, '%s', '%s', '%s', %d, '%s', %d, '%s', %d, '%s', %d);", ID[poll_id], end_date, question, option1, 0, option2, 0, option3, 0, option4, 0);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
         return permission_denied;
     }
-    ++poll_id;
+    ++ID[poll_id];
     return success;
 }
 

@@ -12,8 +12,7 @@
 
 #define max_size    500
 
-int reserved_meal_id = 1;
-int taken_meal_id = 1;
+
 
 enum gender {
     male, female
@@ -100,12 +99,33 @@ int reserve(const char *self_id, const char *date, const char *meal, const char 
         sqlite3_free(errmsg);
         return permission_denied;
     }
-    ++reserved_meal_id;
+    ++ID[reserved_meal_id];
     return success;
 }
 
 int take_food(const char *self_id, const char *date, const char *meal) {
     if (current_user.user_type != student) {
+        return permission_denied;
+    }
+    if (strcmp(current_date_time.date, date)) {
+        return permission_denied;
+    }
+    char *errmsg = NULL;
+    char sql[max_size];
+    if (strcmp(meal, "lunch") == 0) {
+        sprintf(sql, "select %s >= (select lunch_time_start from SELF where self_id = %s) and %s <= (select lunc_time_end from SELF where self_id = %s);", current_date_time.time, self_id, current_date_time.time, self_id);
+    }
+    else {
+        sprintf(sql, "select %s >= (select dinner_time_start from SELF where self_id = %s) and %s <= (select dinner_time_end from SELF where self_id = %s);", current_date_time.time, self_id, current_date_time.time, self_id);
+    }
+    int in_time;
+    int rc = sqlite3_exec(db, sql, callback, &in_time, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return permission_denied;
+    }
+    if (in_time == 0) {
         return permission_denied;
     }
     char condition[max_size];
@@ -117,24 +137,22 @@ int take_food(const char *self_id, const char *date, const char *meal) {
     if (is_exists("RESERVED_MEAL", condition) != 1) {
         return permission_denied;
     }
-    char *errmsg = NULL;
-    char sql[max_size];
     int food_id;
     sprintf(sql, "select food_id from RESERVED_MEAL where student_id = '%s' and self_id = %s and date = '%s' and type = '%s' ", current_user.username, self_id, date, meal);
-    int rc = sqlite3_exec(db, sql, callback, &food_id, &errmsg);
+    rc = sqlite3_exec(db, sql, callback, &food_id, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
         return permission_denied;
     }
-    sprintf(sql, "insert into TAKEN_MEAL values(%d, '%s', %s, %d, '%s');", taken_meal_id, current_user.username, self_id, food_id, date);
+    sprintf(sql, "insert into TAKEN_MEAL values(%d, '%s', %s, %d, '%s');", ID[taken_meal_id], current_user.username, self_id, food_id, date);
     rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
         return permission_denied;
     }
-    ++taken_meal_id;
+    ++ID[taken_meal_id];
     return success;
 }
 
