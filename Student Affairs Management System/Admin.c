@@ -60,10 +60,22 @@ int approve(const char *user_id) {
         sqlite3_free(errmsg);
         return permission_denied;
     }
-    if (exist == not_found) {
+    if (exist == success) {
+        sprintf(sql, "delete from PENDING where user_id = '%s';", user_id);
+        rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
+        if (rc != SQLITE_OK) {
+            fprintf(stderr, "SQL error: %s\n", errmsg);
+            sqlite3_free(errmsg);
+            return permission_denied;
+        }
+        return success;
+    }
+    char condition[max_size];
+    sprintf(condition, "where student_id = '%s' and activate = 0 ", user_id);
+    if (is_exists("STUDENTS", condition) != 1) {
         return not_found;
     }
-    sprintf(sql, "delete from PENDING where user_id = '%s';", user_id);
+    sprintf(sql, "update STUDENTS set activate = 1 where student_id = '%s';", user_id);
     rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);

@@ -14,10 +14,15 @@ enum type {
 };
 
 enum result {
-  success, not_found, permission_denied, invalid, end_of_line, end_of_file
+  success, not_found, permission_denied, invalid, end_of_line, end_of_file, insufficient_money
 };
 
 extern sqlite3 *db;
+
+extern struct _date_time {
+    char date[11];
+    char time[5];
+} current_date_time;
 
 extern struct _user {
     char username[30];

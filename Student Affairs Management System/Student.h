@@ -9,4 +9,5 @@
 #define Student_h
 
 int reserve(const char *self_id, const char *date, const char *meal, const char *food_id);
+int take_food(const char *self_id, const char *date, const char *meal);
 #endif /* Student_h */

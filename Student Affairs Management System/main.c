@@ -9,8 +9,11 @@
 #include "Utility.h"
 #include "Admin.h"
 #include "Test Case.h"
+#include <string.h>
 
 #define max_size_filename   100
+
+typedef struct _date_time date_time;
 
 sqlite3 *db;
 
@@ -103,7 +106,7 @@ int create_my_tables(void) {
                     "OPTION_3    TEXT, " \
                     "COUNT_3     INT, " \
                     "OPTION_4    TEXT, " \
-                    "COUNT_4     INT, ";
+                    "COUNT_4     INT ";
     
     if (create_table(db, admin_tbl, admin_def) != 0) {
         return -1;
@@ -144,6 +147,21 @@ int create_my_tables(void) {
     return 0;
 }
 
+static int callback(void *data, int argc, char **argv, char **col_name) {
+    sscanf(argv[0], "%s%s", ((date_time *)data)->date, ((date_time *)data)->time);
+    return 0;
+}
+
+void set_date_time(void) {
+    char *errmsg = NULL;
+    char *sql = "select strftime('%Y-%m-%d %H%M', 'now');";
+    int rc = sqlite3_exec(db, sql, callback, &current_date_time, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+    }
+}
+
 int main(int argc, const char * argv[]) {
     char *db_name = "samsDB.db";
     if (create_db(db_name, &db) != 0) {
@@ -155,6 +173,7 @@ int main(int argc, const char * argv[]) {
         return -1;
     }
     current_user.user_type = none;
+    set_date_time();
     FILE *input = fopen("input.txt", "r");
     FILE *output = fopen("output.txt", "w");
     get_command(input, output);

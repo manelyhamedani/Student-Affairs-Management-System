@@ -733,6 +733,9 @@ void get_command(FILE *input, FILE *output) {
                 else if (result == not_found) {
                     fprintf(output, "%d#not-found\n", command_id);
                 }
+                else if (result == insufficient_money) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
                 else {
                     fprintf(output, "%d#success\n", command_id);
                 }

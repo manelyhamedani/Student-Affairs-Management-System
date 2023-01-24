@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 struct _user current_user;
+struct _date_time current_date_time;
 #define max_size    500
 
 static int callback(void *data, int argc, char **argv, char **col_name) {
