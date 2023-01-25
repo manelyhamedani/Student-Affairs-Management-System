@@ -10,9 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define max_size    500
-
-
 
 
 

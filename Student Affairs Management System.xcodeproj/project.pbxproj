@@ -12,6 +12,8 @@
 		BA8209E22979D6F000BD7AB3 /* Utility.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8209E12979D6F000BD7AB3 /* Utility.c */; };
 		BA8209E52979DAC200BD7AB3 /* Admin.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8209E42979DAC200BD7AB3 /* Admin.c */; };
 		BA8209E8297AF74300BD7AB3 /* Test Case.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8209E7297AF74300BD7AB3 /* Test Case.c */; };
+		BA8209FE298064C000BD7AB3 /* Standard Format.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8209FD298064C000BD7AB3 /* Standard Format.c */; };
+		BA820A0129808E6500BD7AB3 /* Menu.c in Sources */ = {isa = PBXBuildFile; fileRef = BA820A0029808E6500BD7AB3 /* Menu.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -37,6 +39,10 @@
 		BA8209E42979DAC200BD7AB3 /* Admin.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Admin.c; sourceTree = "<group>"; };
 		BA8209E6297AF74300BD7AB3 /* Test Case.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Test Case.h"; sourceTree = "<group>"; };
 		BA8209E7297AF74300BD7AB3 /* Test Case.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "Test Case.c"; sourceTree = "<group>"; };
+		BA8209FC298064C000BD7AB3 /* Standard Format.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Standard Format.h"; sourceTree = "<group>"; };
+		BA8209FD298064C000BD7AB3 /* Standard Format.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "Standard Format.c"; sourceTree = "<group>"; };
+		BA8209FF29808E6500BD7AB3 /* Menu.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Menu.h; sourceTree = "<group>"; };
+		BA820A0029808E6500BD7AB3 /* Menu.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Menu.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,12 +76,16 @@
 			isa = PBXGroup;
 			children = (
 				BA8209D32979D57B00BD7AB3 /* main.c */,
+				BA8209FF29808E6500BD7AB3 /* Menu.h */,
+				BA820A0029808E6500BD7AB3 /* Menu.c */,
 				BA8209E6297AF74300BD7AB3 /* Test Case.h */,
 				BA8209E7297AF74300BD7AB3 /* Test Case.c */,
 				BA8209DA2979D59C00BD7AB3 /* Student.h */,
 				BA8209DB2979D59C00BD7AB3 /* Student.c */,
 				BA8209E32979DAC200BD7AB3 /* Admin.h */,
 				BA8209E42979DAC200BD7AB3 /* Admin.c */,
+				BA8209FC298064C000BD7AB3 /* Standard Format.h */,
+				BA8209FD298064C000BD7AB3 /* Standard Format.c */,
 				BA8209E02979D6F000BD7AB3 /* Utility.h */,
 				BA8209E12979D6F000BD7AB3 /* Utility.c */,
 			);
@@ -141,8 +151,10 @@
 			files = (
 				BA8209D42979D57B00BD7AB3 /* main.c in Sources */,
 				BA8209E52979DAC200BD7AB3 /* Admin.c in Sources */,
+				BA820A0129808E6500BD7AB3 /* Menu.c in Sources */,
 				BA8209DC2979D59C00BD7AB3 /* Student.c in Sources */,
 				BA8209E22979D6F000BD7AB3 /* Utility.c in Sources */,
+				BA8209FE298064C000BD7AB3 /* Standard Format.c in Sources */,
 				BA8209E8297AF74300BD7AB3 /* Test Case.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

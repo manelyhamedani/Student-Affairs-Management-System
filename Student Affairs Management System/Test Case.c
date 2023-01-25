@@ -19,109 +19,7 @@
 #define max_size_parameter      500
 #define max_size_parameter_name 30
 
-typedef struct {
-    char username[max_size_parameter];
-    char password[max_size_parameter];
-} login_parameter;
 
-typedef struct {
-    char username[max_size_parameter];
-} logout_parameter;
-
-typedef struct {
-    char name[max_size_parameter];
-    char family[max_size_parameter];
-    char user_id[max_size_parameter];
-    char password[max_size_parameter];
-    char national_id[max_size_parameter];
-    char birthdate[max_size_parameter];
-    char gender[max_size_parameter];
-    char type[max_size_parameter];
-} register_parameter;
-
-typedef struct {
-    char user_id[max_size_parameter];
-} approve_parameter;
-
-typedef struct {
-    char user_id[max_size_parameter];
-    char old_pass[max_size_parameter];
-    char new_pass[max_size_parameter];
-} change_pass_parameter;
-
-typedef struct {
-    char user_id[max_size_parameter];
-    char new_pass[max_size_parameter];
-} change_student_pass_parameter;
-
-typedef struct {
-    char user_id[max_size_parameter];
-} remove_student_parameter;
-
-typedef struct {
-    char user_id[max_size_parameter];
-} deactivate_parameter;
-
-typedef struct {
-    char self_id[max_size_parameter];
-    char name[max_size_parameter];
-    char location[max_size_parameter];
-    char capacity[max_size_parameter];
-    char type[max_size_parameter];
-    char meal[max_size_parameter];
-    char lunch_time_start[max_size_parameter];
-    char lunch_time_end[max_size_parameter];
-    char dinner_time_start[max_size_parameter];
-    char dinner_time_end[max_size_parameter];
-} self_parameter;
-
-typedef struct {
-    char food_id[max_size_parameter];
-    char name[max_size_parameter];
-    char type[max_size_parameter];
-    char price[max_size_parameter];
-} food_parameter;
-
-typedef struct {
-    char self_id[max_size_parameter];
-    char date[max_size_parameter];
-    char type[max_size_parameter];
-    char food_id[max_size_parameter];
-    char count[max_size_parameter];
-} meal_plan_parameter;
-
-typedef struct {
-    char user_id[max_size_parameter];
-    char amount[max_size_parameter];
-} charge_student_account_parameter;
-
-typedef struct {
-    char title[max_size_parameter];
-    char content[max_size_parameter];
-    char end_date[max_size_parameter];
-} news_parameter;
-
-typedef struct {
-    char question[max_size_parameter];
-    char option1[max_size_parameter];
-    char option2[max_size_parameter];
-    char option3[max_size_parameter];
-    char option4[max_size_parameter];
-    char end_date[max_size_parameter];
-} poll_parameter;
-
-typedef struct {
-    char self_id[max_size_parameter];
-    char date[max_size_parameter];
-    char meal[max_size_parameter];
-    char food_id[max_size_parameter];
-} reserve_parameter;
-
-typedef struct {
-    char self_id[max_size_parameter];
-    char date[max_size_parameter];
-    char meal[max_size_parameter];
-} take_food_parameter;
 
 char parameter_name[max_size_parameter_name];
 char parameter_line[max_size_parameter];
@@ -410,13 +308,75 @@ int get_take_food_parameter(FILE *input, take_food_parameter *parameter) {
     return success;
 }
 
+int get_charge_account_parameter(FILE *input, charge_account_parameter *parameter) {
+    fgets(parameter_line, max_size_parameter, input);
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->amount, &symbol, parameter_name, &symbol, parameter->card_number, &symbol, parameter_name, &symbol, parameter->pass_code) != 11) {
+        return invalid;
+    }
+    return success;
+}
+
+int get_send_charge_parameter(FILE *input, send_charge_parameter *parameter) {
+    fgets(parameter_line, max_size_parameter, input);
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->user_id, &symbol, parameter_name, &symbol, parameter->amount, &symbol, parameter_name, &symbol, parameter->name) != 11) {
+        return invalid;
+    }
+    return success;
+}
+
+int get_cancel_reserve_parameter(FILE *input, cancel_reserve_parameter *parameter) {
+    fgets(parameter_line, max_size_parameter, input);
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->date, &symbol, parameter_name, &symbol, parameter->meal) != 7) {
+        return invalid;
+    }
+    if (strcmp(parameter->meal, "lunch") && strcmp(parameter->meal, "dinner")) {
+        return invalid;
+    }
+    return success;
+}
+
+int get_daily_reserve_parameter(FILE *input, daily_reserve_parameter *parameter) {
+    fgets(parameter_line, max_size_parameter, input);
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->self_id, &symbol, parameter_name, &symbol, parameter->food_id) != 7) {
+        return invalid;
+    }
+    return success;
+}
+
+int get_agent_parameter(FILE *input, agent_parameter *parameter) {
+    fgets(parameter_line, max_size_parameter, input);
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->date, &symbol, parameter_name, &symbol, parameter->meal, &symbol, parameter_name, &symbol, parameter->user_id) != 11) {
+        return invalid;
+    }
+    return success;
+}
+
+int get_change_self_parameter(FILE *input, change_self_parameter *parameter) {
+    fgets(parameter_line, max_size_parameter, input);
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->date, &symbol, parameter_name, &symbol, parameter->meal, &symbol, parameter_name, &symbol, parameter->new_self) != 11) {
+        return invalid;
+    }
+    if (strcmp(parameter->meal, "lunch") && strcmp(parameter->meal, "dinner")) {
+        return invalid;
+    }
+    return success;
+}
+
+int get_datetime_parameter(FILE *input, datetime_parameter *parameter) {
+    fgets(parameter_line, max_size_parameter, input);
+    if (sscanf(parameter_line, "%[^:]%c%[^|]%c%[^:]%c%s", parameter_name, &symbol, parameter->date, &symbol, parameter_name, &symbol, parameter->time) != 7) {
+        return invalid;
+    }
+    return success;
+}
+
 void get_command(FILE *input, FILE *output) {
     char command[max_size_command];
     int command_id;
     int result;
     char separator;
     while (true) {
-        fscanf(input, "%d#%[^#]%c", &command_id, command, &separator);
+        fscanf(input, "%d#%[^# || '\n']%c", &command_id, command, &separator);
         if (feof(input)) {
             break;
         }
@@ -745,7 +705,7 @@ void get_command(FILE *input, FILE *output) {
                 fprintf(output, "%d#invalid\n", command_id);
             }
             else {
-                result = reserve(parameter.self_id, parameter.date, parameter.meal, parameter.food_id);
+                result = reserve(parameter.self_id, parameter.date, parameter.meal, parameter.food_id, 1, 0);
                 if (result == permission_denied) {
                     fprintf(output, "%d#permission-denied\n", command_id);
                 }
@@ -783,6 +743,158 @@ void get_command(FILE *input, FILE *output) {
             continue;
         }
         
+        if (strcmp(command, "charge-account") == 0) {
+            charge_account_parameter parameter;
+            result = get_charge_account_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = charge_account(parameter.amount);
+                if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
+        
+        if (strcmp(command, "send-charge") == 0) {
+            send_charge_parameter parameter;
+            result = get_send_charge_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = send_charge(parameter.user_id, parameter.amount, parameter.name);
+                if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
+        
+        if (strcmp(command, "cancel-reserve") == 0) {
+            cancel_reserve_parameter parameter;
+            result = get_cancel_reserve_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = cancel_reserve(parameter.date, parameter.meal);
+                if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
+        
+        if (strcmp(command, "daily-reserve") == 0) {
+            daily_reserve_parameter parameter;
+            result = get_daily_reserve_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = daily_reserve(parameter.self_id, parameter.food_id);
+                if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else if (result == insufficient_money) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
+        
+        if (strcmp(command, "define-agent") == 0) {
+            agent_parameter parameter;
+            result = get_agent_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = define_agent(parameter.date, parameter.meal, parameter.user_id);
+                if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
+        
+        if (strcmp(command, "check-news") == 0) {
+            result = check_news();
+            if (result == permission_denied) {
+                fprintf(output, "%d#permission-denied\n", command_id);
+            }
+            else if (result == not_found) {
+                fprintf(output, "%d#not-found\n", command_id);
+            }
+            else {
+                fprintf(output, "%d#success\n", command_id);
+            }
+            continue;
+        }
+        
+        if (strcmp(command, "vote") == 0) {
+            result = vote(0, 0, 1);
+            if (result == permission_denied) {
+                fprintf(output, "%d#permission-denied\n", command_id);
+            }
+            else if (result == not_found) {
+                fprintf(output, "%d#not-found\n", command_id);
+            }
+            else {
+                fprintf(output, "%d#success\n", command_id);
+            }
+            continue;
+        }
+        
+        
+        if (strcmp(command, "change-datetime") == 0) {
+            datetime_parameter parameter;
+            result = get_datetime_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                change_datetime(parameter.date, parameter.time);
+                fprintf(output, "%d#success\n", command_id);
+            }
+        }
+        
+        else {
+            fprintf(output, "%d#invalid\n", command_id);
+        }
         
     }
     

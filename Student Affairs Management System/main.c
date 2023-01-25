@@ -10,8 +10,10 @@
 #include "Admin.h"
 #include "Test Case.h"
 #include <string.h>
+#include <stdlib.h>
+#include "Menu.h"
+#include <time.h>
 
-#define max_size    500
 #define max_size_filename   100
 
 typedef struct _date_time date_time;
@@ -77,7 +79,8 @@ int create_my_tables(void) {
                                 "TYPE               TEXT    NOT NULL, " \
                                 "DATE               TEXT    NOT NULL, " \
                                 "AGENT              TEXT, " \
-                                "DAILY_RESERVED     TINYINT NOT NULL ";
+                                "DAILY_RESERVED     TINYINT NOT NULL, " \
+                                "TAKEN              TINYINT NOT NULL";
     char *taken_meal_tbl = "TAKEN_MEAL";
     char *taken_meal_def = "TAKEN_MEAL_ID           INT     PRIMARY KEY     NOT NULL, " \
                             "STUDENT_ID             TEXT    REFERENCES STUDENTS     NOT NULL, " \
@@ -150,20 +153,8 @@ int create_my_tables(void) {
     return 0;
 }
 
-static int set_date_callback(void *data, int argc, char **argv, char **col_name) {
-    sscanf(argv[0], "%s%s", ((date_time *)data)->date, ((date_time *)data)->time);
-    return 0;
-}
 
-void set_date_time(void) {
-    char *errmsg = NULL;
-    char *sql = "select strftime('%Y-%m-%d %H%M', 'now');";
-    int rc = sqlite3_exec(db, sql, set_date_callback, &current_date_time, &errmsg);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
-        sqlite3_free(errmsg);
-    }
-}
+
 
 static int set_id_callback(void *data, int argc, char **argv, char **col_name) {
     static int counter = 0;
@@ -190,49 +181,55 @@ void set_id(void) {
     }
 }
 
+void set_system_datetime(void) {
+    get_date_time();
+    sprintf(current_date_time.date, "%d-%d-%d", current_time->tm_year + 1900, current_time->tm_mon + 1, current_time->tm_mday);
+    sprintf(current_date_time.time, "%d%d", current_time->tm_hour, current_time->tm_min);
+}
+
 int main(int argc, const char * argv[]) {
     char *db_name = "samsDB.db";
-    if (create_db(db_name, &db) != 0) {
-        puts("Cannot create database!");
+    char *errmsg = NULL;
+    int rc = sqlite3_open(db_name, &db);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
         return -1;
     }
-    if (create_my_tables() != 0) {
-        puts("Cannot create tables!");
-        return -1;
-    }
+//    if (create_db(db_name, &db) != 0) {
+//        puts("Cannot create database!");
+//        return -1;
+//    }
+//    if (create_my_tables() != 0) {
+//        puts("Cannot create tables!");
+//        return -1;
+//    }
     current_user.user_type = none;
-    set_date_time();
+    set_system_datetime();
     set_id();
-    FILE *input = fopen("input.txt", "r");
-    FILE *output = fopen("output.txt", "w");
-    get_command(input, output);
-//
-//    char test_case_flag;
-//    puts("Do you wanna open test-case file? (y or n)");
-//    scanf("%c", &test_case_flag);
-//    if (test_case_flag == 'y' || test_case_flag == 'Y') {
-//        char input_name[max_size_filename];
-//        char output_name[max_size_filename];
-//        puts("Enter input file name:");
-//        scanf("%s", input_name);
-//        puts("Enter output file name:");
-//        scanf("%s", output_name);
-//        FILE *input = fopen(input_name, "r");
-//        if (input == NULL) {
-//            puts("Cannot open input file!");
-//            return -1;
-//        }
-//        FILE *output = fopen(output_name, "w");
-//        if (output == NULL) {
-//            puts("Cannot open output file!");
-//            return -1;
-//        }
-//        get_command(input, output);
-    //    fclose(input);
-    //    fclose(output);
-//    }
-//    else {
-//
-//    }
+    
+//    get_command(input, output);
+    
+    char test_case_flag;
+    puts("Do you wanna open test-case file? (y or n)");
+    scanf("%c", &test_case_flag);
+    if (test_case_flag == 'y' || test_case_flag == 'Y') {
+        FILE *input = fopen("input.txt", "r");
+        FILE *output = fopen("output.txt", "w");
+        if (input == NULL) {
+            puts("Cannot open input file!");
+            return -1;
+        }
+        if (output == NULL) {
+            puts("Cannot open output file!");
+            return -1;
+        }
+        get_command(input, output);
+        fclose(input);
+        fclose(output);
+    }
+    else {
+        main_menu();
+    }
     return 0;
 }

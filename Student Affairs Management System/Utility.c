@@ -8,12 +8,38 @@
 #include "Utility.h"
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
+
 
 struct _user current_user;
 struct _date_time current_date_time;
-#define max_size    500
 
 int ID[5];
+struct tm *current_time;
+struct tm *last_time;
+
+void get_date_time(void) {
+    time_t t;
+    time(&t);
+    current_time = localtime(&t);
+}
+
+void set_date_time(void) {
+    int year, month, day;
+    int hour, minute;
+    sscanf(current_date_time.date, "%d-%d-%d", &year, &month, &day);
+    sscanf(current_date_time.time, "%2d%2d", &hour, &minute);
+    get_date_time();
+    int new_year = current_time->tm_year - last_time->tm_year + year;
+    int new_month = current_time->tm_mon - last_time->tm_mon + month;
+    int new_day = current_time->tm_mday - last_time->tm_mday + day;
+    int new_hour = current_time->tm_hour - last_time->tm_hour + hour;
+    int new_minute = current_time->tm_min - last_time->tm_min + minute;
+    sprintf(current_date_time.date, "%d-%d-%d", new_year, new_month, new_day);
+    sprintf(current_date_time.time, "%d%d", new_hour, new_minute);
+    last_time = current_time;
+}
+
 
 static int callback(void *data, int argc, char **argv, char **col_name) {
     if (strcmp(argv[0], "1") == 0) {
@@ -153,5 +179,10 @@ int create_db(const char *db_name, sqlite3 **ppDB) {
 }
 
 
+void change_datetime(const char *date, const char *time) {
+    strcpy(current_date_time.date, date);
+    strcpy(current_date_time.time, time);
+    last_time = current_time;
+}
 
 
