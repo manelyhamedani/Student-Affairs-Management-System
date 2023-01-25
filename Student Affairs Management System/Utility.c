@@ -14,7 +14,9 @@
 struct _user current_user;
 struct _date_time current_date_time;
 
-int ID[5];
+int ID[5] = {1, 1, 1, 1, 1};
+char *student_affairs[] = { "login", "logout", "register", "reserve", "take_food", "charge_account", "send_charge", "cancel_reserve", "daily_reserve", "define_agent", "change_self", "check_news", "vote", "recieve_charge_by_admin", "recieve_charge_by_student", "change_pass", "change_pass_by_admin", "change_datetime" };
+
 struct tm *current_time;
 struct tm *last_time;
 
@@ -35,8 +37,8 @@ void set_date_time(void) {
     int new_day = current_time->tm_mday - last_time->tm_mday + day;
     int new_hour = current_time->tm_hour - last_time->tm_hour + hour;
     int new_minute = current_time->tm_min - last_time->tm_min + minute;
-    sprintf(current_date_time.date, "%d-%d-%d", new_year, new_month, new_day);
-    sprintf(current_date_time.time, "%d%d", new_hour, new_minute);
+    sprintf(current_date_time.date, "%04d-%02d-%02d", new_year, new_month, new_day);
+    sprintf(current_date_time.time, "%02d%02d", new_hour, new_minute);
     last_time = current_time;
 }
 

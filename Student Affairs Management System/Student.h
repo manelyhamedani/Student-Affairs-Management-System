@@ -17,6 +17,8 @@ int cancel_reserve(const char *date, const char *meal);
 int daily_reserve(const char *self_id, const char *food_id);
 int define_agent(const char *date, const char *meal, const char *user_id);
 int change_self(const char *date, const char *meal, const char *new_self);
-int check_news(void);
+int check_news(int is_testcase);
 int vote(int poll_id, int option, int is_testcase);
+void student_report(int affair_id, const char *student_id, double balance_change);
+
 #endif /* Student_h */

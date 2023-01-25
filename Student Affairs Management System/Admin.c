@@ -10,9 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 
-
-
-
 static int callback(void *data, int argc, char **argv, char **col_name) {
     *((int *)data) = success;
     char sql[max_size];
@@ -87,7 +84,7 @@ int change_student_pass(const char *user_id, const char *new_pass) {
         return permission_denied;
     }
     char condition[max_size];
-    sprintf(condition, "where student_id = '%s' and activate = 1", user_id);
+    sprintf(condition, "where student_id = '%s' and activate = 1 ", user_id);
     if (is_exists("STUDENTS", condition) != 1) {
         return not_found;
     }
@@ -135,7 +132,7 @@ int deactivate(const char *user_id) {
     }
     char *errmsg = NULL;
     char sql[max_size];
-    sprintf(sql, "update STUDENTS set activate = 0;");
+    sprintf(sql, "update STUDENTS set activate = 0 where student_id = '%s';", user_id);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
@@ -257,6 +254,20 @@ int add_poll(const char *question, const char *option1, const char *option2, con
     ++ID[poll_id];
     return success;
 }
+
+int statistics(const char *date, const char *meal, int is_taken) {
+    char str[max_size];
+    sprintf(str, "RESERVED_MEAL where date = '%s' and type = '%s' and taken = %d group by self_id", date, meal, is_taken);
+    int result;
+    if ((result = get_data("self_id, count()", str)) != success) {
+        return result;
+    }
+    printf("\nTotal ");
+    sprintf(str, "RESERVED_MEAL where date = '%s' and type = '%s' and taken = %d", date, meal, is_taken);
+    result = get_data("count()", str);
+    return result;
+}
+
 
 
 

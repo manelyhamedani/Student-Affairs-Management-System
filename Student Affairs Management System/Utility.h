@@ -16,12 +16,17 @@ enum type {
 };
 
 enum result {
-  success, not_found, permission_denied, invalid, end_of_line, end_of_file, insufficient_money
+    success, not_found, permission_denied, invalid, end_of_line, end_of_file, insufficient_money, stop
+};
+
+enum student_affair {
+    _login, _logout, _register, _reserve, _take_food, _charge_account, _send_charge, _cancel_reserve, _daily_reserve, _define_agent, _change_self, _check_news, _vote, _recieve_charge_by_admin, _recieve_charge_by_student, _change_pass, _change_pass_by_admin, _change_datetime
 };
 
 extern sqlite3 *db;
 extern struct tm *current_time;
 extern struct tm *last_time;
+extern char *student_affairs[];
 
 extern struct _date_time {
     char date[11];
@@ -194,4 +199,5 @@ int create_db(const char *db_name, sqlite3 **ppDB);
 void change_datetime(const char *date, const char *time);
 void get_date_time(void);
 void set_date_time(void);
+int get_data(const char *columns, const char *tbl_name);
 #endif /* Utility_h */

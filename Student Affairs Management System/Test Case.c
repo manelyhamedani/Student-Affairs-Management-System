@@ -96,14 +96,14 @@ int get_register_parameter(FILE *input, register_parameter *parameter) {
 }
 
 int get_approve_parameter(FILE *input, approve_parameter *parameter) {
-    int rv = fscanf(input, "%[^:]%c%[^| || '\n']%c", parameter_name, &symbol, parameter->user_id, &symbol);
+    int rv = fscanf(input, "%[^:]%c%[^| || '\n' || '\r']%c", parameter_name, &symbol, parameter->user_id, &symbol);
     if (rv != 4) {
         if (feof(input)) {
             return end_of_file;
         }
         return invalid;
     }
-    if (symbol == '\n') {
+    if (symbol == '\n' || symbol == '\r') {
         return end_of_line;
     }
     return success;
@@ -446,9 +446,9 @@ void get_command(FILE *input, FILE *output) {
         
         if (strcmp(command, "approve") == 0) {
             fprintf(output, "%d#", command_id);
+            char garbage[max_size_parameter];
             if (current_user.user_type == student) {
                 fprintf(output, "permission-denied\n");
-                char garbage[max_size_parameter];
                 fgets(garbage, max_size_parameter, input);
                 continue;
             }
@@ -456,14 +456,9 @@ void get_command(FILE *input, FILE *output) {
             while (true) {
                 result = get_approve_parameter(input, &parameter);
                 if (result == invalid) {
-                    fprintf(output, "invalid");
-                    if (feof(input)) {
-                        fprintf(output, "\n");
-                        break;
-                    }
-                    else {
-                        fprintf(output, "|");
-                    }
+                    fprintf(output, "invalid\n");
+                    fgets(garbage, max_size_parameter, input);
+                    break;
                 }
                 else if (result == end_of_line || result == end_of_file) {
                     result = approve(parameter.user_id);
@@ -471,24 +466,21 @@ void get_command(FILE *input, FILE *output) {
                         fprintf(output, "not-found\n");
                     }
                     else if (result == permission_denied) {
-                        fprintf(output, "%d#permission-denied\n", command_id);
+                        fprintf(output, "permission-denied\n");
                     }
                     else {
                         fprintf(output, "success\n");
                     }
                     break;
                 }
-                else {
-                    result = approve(parameter.user_id);
-                    if (result == not_found) {
-                        fprintf(output, "not-found|");
-                    }
-                    else if (result == permission_denied) {
-                        fprintf(output, "%d#permission-denied\n", command_id);
-                    }
-                    else {
-                        fprintf(output, "success|");
-                    }
+                result = approve(parameter.user_id);
+                if (result == not_found) {
+                    fprintf(output, "not-found\n");
+                    break;
+                }
+                else if (result == permission_denied) {
+                    fprintf(output, "permission-denied\n");
+                    break;
                 }
             }
             continue;
@@ -667,9 +659,6 @@ void get_command(FILE *input, FILE *output) {
                 if (result == permission_denied) {
                     fprintf(output, "%d#permission-denied\n", command_id);
                 }
-                else if (result == not_found) {
-                    fprintf(output, "%d#not-found\n", command_id);
-                }
                 else {
                     fprintf(output, "%d#success\n", command_id);
                 }
@@ -687,9 +676,6 @@ void get_command(FILE *input, FILE *output) {
                 result = add_poll(parameter.question, parameter.option1, parameter.option2, parameter.option3, parameter.option4, parameter.end_date);
                 if (result == permission_denied) {
                     fprintf(output, "%d#permission-denied\n", command_id);
-                }
-                else if (result == not_found) {
-                    fprintf(output, "%d#not-found\n", command_id);
                 }
                 else {
                     fprintf(output, "%d#success\n", command_id);
@@ -851,8 +837,29 @@ void get_command(FILE *input, FILE *output) {
             continue;
         }
         
+        if (strcmp(command, "change-self") == 0) {
+            change_self_parameter parameter;
+            result = get_change_self_parameter(input, &parameter);
+            if (result == invalid) {
+                fprintf(output, "%d#invalid\n", command_id);
+            }
+            else {
+                result = change_self(parameter.date, parameter.meal, parameter.new_self);
+                if (result == permission_denied) {
+                    fprintf(output, "%d#permission-denied\n", command_id);
+                }
+                else if (result == not_found) {
+                    fprintf(output, "%d#not-found\n", command_id);
+                }
+                else {
+                    fprintf(output, "%d#success\n", command_id);
+                }
+            }
+            continue;
+        }
+        
         if (strcmp(command, "check-news") == 0) {
-            result = check_news();
+            result = check_news(1);
             if (result == permission_denied) {
                 fprintf(output, "%d#permission-denied\n", command_id);
             }
@@ -893,6 +900,8 @@ void get_command(FILE *input, FILE *output) {
         }
         
         else {
+            char garbage[max_size];
+            fgets(garbage, max_size, input);
             fprintf(output, "%d#invalid\n", command_id);
         }
         

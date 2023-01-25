@@ -11,5 +11,6 @@
 #include <stdio.h>
 
 void main_menu(void);
-int print_news(void *data, int argc, char **argv, char **col_name);
+
+
 #endif /* Menu_h */

@@ -183,8 +183,9 @@ void set_id(void) {
 
 void set_system_datetime(void) {
     get_date_time();
-    sprintf(current_date_time.date, "%d-%d-%d", current_time->tm_year + 1900, current_time->tm_mon + 1, current_time->tm_mday);
-    sprintf(current_date_time.time, "%d%d", current_time->tm_hour, current_time->tm_min);
+    sprintf(current_date_time.date, "%04d-%02d-%02d", current_time->tm_year + 1900, current_time->tm_mon + 1, current_time->tm_mday);
+    sprintf(current_date_time.time, "%02d%02d", current_time->tm_hour, current_time->tm_min);
+    last_time = current_time;
 }
 
 int main(int argc, const char * argv[]) {
