@@ -63,7 +63,7 @@ int create_my_tables(void) {
     char *food_def = "FOOD_ID           INT     PRIMARY KEY     NOT NULL, " \
                         "NAME           TEXT    NOT NULL, " \
                         "TYPE           TEXT    NOT NULL, " \
-                        "PRICE          REAL    NOT NULL ";
+                        "PRICE          INT    NOT NULL ";
     char *meal_plan_tbl = "MEAL_PLAN";
     char *meal_plan_def = "MEAL_PLAN_ID INT     PRIMARY KEY     NOT NULL, " \
                           "SELF_ID      INT     REFERENCES SELF     NOT NULL, " \
@@ -84,18 +84,21 @@ int create_my_tables(void) {
     char *taken_meal_tbl = "TAKEN_MEAL";
     char *taken_meal_def = "TAKEN_MEAL_ID           INT     PRIMARY KEY     NOT NULL, " \
                             "STUDENT_ID             TEXT    REFERENCES STUDENTS     NOT NULL, " \
-                            "SELF_ID                INT     REFERENCES SELF     NOT NULL, " \
-                            "FOOD_ID                INT     REFERENCES FOOD     NOT NULL, " \
-                            "DATE                   TEXT    NOT NULL ";
+                            "SELF_NAME              TEXT    REFERENCES SELF     NOT NULL, " \
+                            "FOOD_NAME              TEXT    REFERENCES FOOD     NOT NULL, " \
+                            "DATE                   TEXT    NOT NULL, " \
+                            "TIME                   INT     NOT NULL";
     char *student_reports_tbl = "STUDENT_REPORTS";
-    char *student_reports_def = "AFFAIR_ID          INT     PRIMARY KEY     NOT NULL, " \
+    char *student_reports_def = "REPORT_ID          INT     PRIMARY KEY     NOT NULL, " \
+                                "AFFAIR             TEXT     NOT NULL, " \
                                 "STUDENT_ID         TEXT    REFERENCES STUDENTS     NOT NULL, " \
                                 "DATE               TEXT    NOT NULL, " \
                                 "BALANCE_CHANGE     REAL    NOT NULL ";
     char *system_reports_tbl = "SYSTEM_REPORTS";
-    char *system_reports_def = "AFFAIR_ID           INT     PRIMARY KEY     NOT NULL, " \
+    char *system_reports_def =  "REPORT_ID          INT     PRIMARY KEY     NOT NULL, " \
+                                "AFFAIR             TEXT    NOT NULL, " \
                                 "DATE               TEXT    NOT NULL, " \
-                                "DATA               REAL    NOT NULL ";
+                                "AMOUNT             REAL    NOT NULL ";
     char *news_tbl = "NEWS";
     char *news_def = "NEWS_ID    INT    PRIMARY KEY     NOT NULL, " \
                     "TITLE       TEXT   NOT NULL, " \
@@ -173,7 +176,9 @@ void set_id(void) {
                 "select max(news_id) from NEWS;" \
                 "select max(poll_id) from POLL;" \
                 "select max(reserved_meal_id) from RESERVED_MEAL;" \
-                "select max(taken_meal_id) from TAKEN_MEAL;";
+                "select max(taken_meal_id) from TAKEN_MEAL;" \
+                "select max(report_id) from STUDENT_REPORTS;" \
+                "select max(report_id) from SYSTEM_REPORTS;";  
     int rc = sqlite3_exec(db, sql, set_id_callback, ID, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);

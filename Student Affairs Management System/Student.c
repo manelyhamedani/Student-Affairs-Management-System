@@ -11,6 +11,8 @@
 #include <string.h>
 #include "Menu.h"
 #include <stdlib.h>
+#include <ctype.h>
+#include <time.h>
 
 
 
@@ -31,8 +33,11 @@ static int callback(void *data, int argc, char **argv, char **col_name) {
     else if (strcmp(argv[0], "female") == 0){
         *((int *)data) = female;
     }
-    else {
+    else if (isdigit(argv[0][0])) {
         sscanf(argv[0], "%d", (int *)data);
+    }
+    else {
+        sscanf(argv[0], "%s", (char *)data);
     }
     return 0;
 }
@@ -125,7 +130,7 @@ int reserve(const char *self_id, const char *date, const char *meal, const char 
         sqlite3_free(errmsg);
         return permission_denied;
     }
-    double price;
+    int price;
     sprintf(sql, "select price from FOOD where food_id = %s;", food_id);
     rc = sqlite3_exec(db, sql, callback, &price, &errmsg);
     if (rc != SQLITE_OK) {
@@ -133,7 +138,24 @@ int reserve(const char *self_id, const char *date, const char *meal, const char 
         sqlite3_free(errmsg);
         return permission_denied;
     }
-    sprintf(sql, "update STUDENTS set balance = balance - (%d * %lf) where student_id = '%s';", ratio, price, current_user.username);
+    char food_type[max_size];
+    sprintf(sql, "select type from FOOD where food_id = %s;", food_id);
+    rc = sqlite3_exec(db, sql, callback, food_type, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return permission_denied;
+    }
+    if (is_daily) {
+        system_report(_daily_reserved, ratio * price);
+    }
+    else if (strcmp(food_type, "food") == 0) {
+        system_report(_food_reserved, ratio * price);
+    }
+    else {
+        system_report(_dessert_reserved, ratio * price);
+    }
+    sprintf(sql, "update STUDENTS set balance = balance - (%d * %d) where student_id = '%s';", ratio, price, current_user.username);
     rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
@@ -193,7 +215,37 @@ int take_food(const char *self_id, const char *date, const char *meal) {
         sqlite3_free(errmsg);
         return permission_denied;
     }
-    sprintf(sql, "insert into TAKEN_MEAL values(%d, '%s', %s, %d, '%s');", ID[taken_meal_id], current_user.username, self_id, food_id, date);
+    char food_name[max_size];
+    sprintf(sql, "select name from FOOD where food_id = %d;", food_id);
+    rc = sqlite3_exec(db, sql, callback, food_name, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return permission_denied;
+    }
+    char self_name[max_size];
+    sprintf(sql, "select name from SELF where self_id = %s;", self_id);
+    rc = sqlite3_exec(db, sql, callback, self_name, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return permission_denied;
+    }
+    char food_type[max_size];
+    sprintf(sql, "select type from FOOD where food_id = %d;", food_id);
+    rc = sqlite3_exec(db, sql, callback, food_type, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return permission_denied;
+    }
+    if (strcmp(food_type, "food") == 0) {
+        system_report(_food_taken, 0);
+    }
+    else {
+        system_report(_dessert_taken, 0);
+    }
+    sprintf(sql, "insert into TAKEN_MEAL values(%d, '%s', '%s', '%s', '%s', %s);", ID[taken_meal_id], current_user.username, self_name, food_name, date, current_date_time.time);
     rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
@@ -307,7 +359,7 @@ int cancel_reserve(const char *date, const char *meal) {
         sqlite3_free(errmsg);
         return permission_denied;
     }
-    double price;
+    int price;
     sprintf(sql, "select price from FOOD where food_id = %d;", food_id);
     rc = sqlite3_exec(db, sql, callback, &price, &errmsg);
     if (rc != SQLITE_OK) {
@@ -315,7 +367,7 @@ int cancel_reserve(const char *date, const char *meal) {
         sqlite3_free(errmsg);
         return permission_denied;
     }
-    sprintf(sql, "update STUDENTS set balance = balance + (0.9 * %lf) where student_id = '%s';", price, current_user.username);
+    sprintf(sql, "update STUDENTS set balance = balance + (0.9 * %d) where student_id = '%s';", price, current_user.username);
     rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
@@ -330,6 +382,7 @@ int cancel_reserve(const char *date, const char *meal) {
         return permission_denied;
     }
     student_report(_cancel_reserve, current_user.username, 0.9 * price);
+    system_report(_cancel_reserved, -0.9 * price);
     return success;
 }
 
@@ -339,10 +392,24 @@ int daily_reserve(const char *self_id, const char *food_id) {
     }
     char *errmsg = NULL;
     char sql[max_size];
-    int lunch_time_end;
-    int dinner_time_end;
+    int lunch_time_start, lunch_time_end;
+    int dinner_time_start, dinner_time_end;
+    sprintf(sql, "select lunch_time_start from SELF where self_id = %s;", self_id);
+    int rc = sqlite3_exec(db, sql, callback, &lunch_time_start, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return permission_denied;
+    }
     sprintf(sql, "select lunch_time_end from SELF where self_id = %s;", self_id);
-    int rc = sqlite3_exec(db, sql, callback, &lunch_time_end, &errmsg);
+    rc = sqlite3_exec(db, sql, callback, &lunch_time_end, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        return permission_denied;
+    }
+    sprintf(sql, "select dinner_time_start from SELF where self_id = %s;", self_id);
+    rc = sqlite3_exec(db, sql, callback, &dinner_time_start, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
@@ -357,11 +424,11 @@ int daily_reserve(const char *self_id, const char *food_id) {
     }
     char condition[max_size];
     set_date_time();
-    sprintf(condition, "where self_id = %s and food_id = %s and date = '%s' and count > 0 and %d - %s >= 30 ", self_id, food_id, current_date_time.date, lunch_time_end, current_date_time.time);
+    sprintf(condition, "where self_id = %s and food_id = %s and date = '%s' and count > 0 and %s - %d >= 0 and %d - %s >= 30 ", self_id, food_id, current_date_time.date, current_date_time.time, lunch_time_start, lunch_time_end, current_date_time.time);
     if (is_exists("MEAL_PLAN", condition) == 1) {
         return reserve(self_id, current_date_time.date, "lunch", food_id, 2, 1);
     }
-    sprintf(condition, "where self_id = %s and food_id = %s and date = '%s' and count > 0 and %d - %s >= 30 ", self_id, food_id, current_date_time.date, dinner_time_end, current_date_time.time);
+    sprintf(condition, "where self_id = %s and food_id = %s and date = '%s' and count > 0 and %s - %d >= 0 and %d - %s >= 30 ", self_id, food_id, current_date_time.date, current_date_time.time, dinner_time_start, dinner_time_end, current_date_time.time);
     if (is_exists("MEAL_PLAN", condition) == 1) {
         return reserve(self_id, current_date_time.date, "dinner", food_id, 2, 1);
     }
@@ -452,8 +519,11 @@ int check_news(int is_testcase) {
     if (is_testcase == 0) {
         sprintf(str, "NEWS where julianday(end_date) - julianday('%s') >= 0", current_date_time.date);
         result = get_data("title, content", str);
+        if (result != success) {
+            return result;
+        }
         student_report(_check_news, current_user.username, 0);
-        return result;
+        return success;
     }
     sprintf(str, "where julianday(end_date) - julianday('%s') >= 0 ", current_date_time.date);
     if (is_exists("NEWS", str) != 1) {
@@ -493,15 +563,26 @@ int vote(int poll_id, int option, int is_testcase) {
     return success;
 }
 
-void student_report(int affair_id, const char *student_id, double balance_change) {
-    char sql[max_size];
-    char *errmsg = NULL;
-    sprintf(sql, "insert into STUDENT_REPORTS values(%d, '%s', '%s', %lf);", affair_id, student_id, current_date_time.date, balance_change);
-    int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
-        sqlite3_free(errmsg);
-    }
+int get_reserved_meal_plan(int week) {
+    set_date_time();
+    char str[max_size];
+    int day_start = current_time->tm_wday + week * 7;
+    int day_end = day_start + 7;
+    sprintf(str, "RESERVED_MEAL where date >= date('%s', '%d day') and date <= date('%s', '%d day')", current_date_time.date, day_start, current_date_time.date, day_end);
+    return get_data("*", str);
 }
+
+int get_financial_report(void) {
+    char *str = "STUDENT_REPORTS where balance_change != 0";
+    return get_data("*", str);
+}
+
+int get_taken_meal_report(void) {
+    char str[max_size];
+    sprintf(str, "TAKEN_MEAL where student_id = '%s'", current_user.username);
+    return get_data("*", str);
+}
+
+
 
 

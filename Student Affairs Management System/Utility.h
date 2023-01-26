@@ -23,10 +23,15 @@ enum student_affair {
     _login, _logout, _register, _reserve, _take_food, _charge_account, _send_charge, _cancel_reserve, _daily_reserve, _define_agent, _change_self, _check_news, _vote, _recieve_charge_by_admin, _recieve_charge_by_student, _change_pass, _change_pass_by_admin, _change_datetime
 };
 
+enum system_affair {
+    _food_reserved, _food_taken, _daily_reserved, _dessert_reserved, _dessert_taken, _cancel_reserved
+};
+
 extern sqlite3 *db;
 extern struct tm *current_time;
 extern struct tm *last_time;
 extern char *student_affairs[];
+extern char *system_affairs[];
 
 extern struct _date_time {
     char date[11];
@@ -40,10 +45,10 @@ extern struct _user {
 } current_user;
 
 
-extern int ID[5];
+extern int ID[7];
 
 enum ID {
-    meal_plan_id, news_id, poll_id, reserved_meal_id, taken_meal_id
+    meal_plan_id, news_id, poll_id, reserved_meal_id, taken_meal_id, student_report_id, system_report_id
 };
 
 typedef struct {
@@ -200,4 +205,6 @@ void change_datetime(const char *date, const char *time);
 void get_date_time(void);
 void set_date_time(void);
 int get_data(const char *columns, const char *tbl_name);
+void student_report(int affair_id, const char *student_id, double balance_change);
+void system_report(int affair_id, double amount);
 #endif /* Utility_h */

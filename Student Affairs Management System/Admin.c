@@ -9,6 +9,7 @@
 #include "Utility.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 static int callback(void *data, int argc, char **argv, char **col_name) {
     *((int *)data) = success;
@@ -97,6 +98,7 @@ int change_student_pass(const char *user_id, const char *new_pass) {
         sqlite3_free(errmsg);
         return permission_denied;
     }
+    student_report(_change_pass_by_admin, user_id, 0);
     return success;
 }
 
@@ -218,6 +220,7 @@ int charge_student_account(const char *user_id, const char *amount) {
         sqlite3_free(errmsg);
         return permission_denied;
     }
+    student_report(_recieve_charge_by_admin, user_id, atof(amount));
     return success;
 }
 
@@ -266,6 +269,18 @@ int statistics(const char *date, const char *meal, int is_taken) {
     sprintf(str, "RESERVED_MEAL where date = '%s' and type = '%s' and taken = %d", date, meal, is_taken);
     result = get_data("count()", str);
     return result;
+}
+
+int get_student_report(const char *start_date, const char *end_date, const char *student_id) {
+    char str[max_size];
+    sprintf(str, "STUDENT_REPORTS where student_id = '%s' and julianday(date) >= julianday('%s') and julianday(date) <= julianday('%s')", student_id, start_date, end_date);
+    return get_data("*", str);
+}
+
+int get_system_report(const char *start_date, const char *end_date) {
+    char str[max_size];
+    sprintf(str, "SYSTEM_REPORTS where julianday(date) >= julianday('%s') and julianday(date) <= julianday('%s')", start_date, end_date);
+    return get_data("*", str);
 }
 
 

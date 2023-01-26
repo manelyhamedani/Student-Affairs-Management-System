@@ -19,6 +19,7 @@ int define_agent(const char *date, const char *meal, const char *user_id);
 int change_self(const char *date, const char *meal, const char *new_self);
 int check_news(int is_testcase);
 int vote(int poll_id, int option, int is_testcase);
-void student_report(int affair_id, const char *student_id, double balance_change);
-
+int get_reserved_meal_plan(int week);
+int get_financial_report(void);
+int get_taken_meal_report(void);
 #endif /* Student_h */

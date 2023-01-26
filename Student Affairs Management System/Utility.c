@@ -14,11 +14,38 @@
 struct _user current_user;
 struct _date_time current_date_time;
 
-int ID[5] = {1, 1, 1, 1, 1};
+int ID[7] = {1, 1, 1, 1, 1, 1, 1};
 char *student_affairs[] = { "login", "logout", "register", "reserve", "take_food", "charge_account", "send_charge", "cancel_reserve", "daily_reserve", "define_agent", "change_self", "check_news", "vote", "recieve_charge_by_admin", "recieve_charge_by_student", "change_pass", "change_pass_by_admin", "change_datetime" };
+
+char *system_affairs[] = { "food_reserved", "food_taken", "daily_reserved", "dessert_reserved", "dessert_taken", "cancel_reserved" };
 
 struct tm *current_time;
 struct tm *last_time;
+
+int print_data(void *data, int argc, char **argv, char **col_name) {
+    *((int *)data) = success;
+    for (int i = 0; i < argc; ++i) {
+        printf("%s: %s\n", col_name[i], argv[i]);
+    }
+    return 0;
+}
+
+int get_data(const char *columns, const char *tbl_name) {
+    char *errmsg = NULL;
+    char sql[max_size];
+    sprintf(sql, "select %s from %s;", columns, tbl_name);
+    int exist = not_found;
+    int rc = sqlite3_exec(db, sql, print_data, &exist, &errmsg);
+    if (rc != SQLITE_OK) {
+        printf("SQL error: %s", errmsg);
+        sqlite3_free(errmsg);
+        return permission_denied;
+    }
+    if (exist == not_found) {
+        return not_found;
+    }
+    return success;
+}
 
 void get_date_time(void) {
     time_t t;
@@ -79,6 +106,7 @@ int user_login(const char *username, const char *password) {
         strcpy(current_user.username, username);
         strcpy(current_user.password, password);
         current_user.user_type = student;
+        student_report(_login, username, 0);
         return success;
     }
     sprintf(condition, "where admin_id = '%s' and password = '%s' ", username, password);
@@ -93,6 +121,9 @@ int user_login(const char *username, const char *password) {
 
 int user_logout(const char *username) {
     if (strcmp(username, current_user.username) == 0) {
+        if (current_user.user_type == student) {
+            student_report(_logout, username, 0);
+        }
         strcpy(current_user.username, "\0");
         strcpy(current_user.password, "\0");
         current_user.user_type = none;
@@ -114,6 +145,7 @@ int user_register(const char *name, const char *family, const char *user_id, con
         if (is_exists("STUDENTS", condition) == 1) {
             return permission_denied;
         }
+        student_report(_register, user_id, 0);
     }
     else {
         sprintf(condition, "where admin_id = '%s' and password = '%s' ", user_id, password);
@@ -145,6 +177,7 @@ int change_pass(const char *username, const char *old_pass, const char *new_pass
     }
     else {
         sprintf(sql, "update STUDENTS set password = '%s' where student_id = '%s';", new_pass, username);
+        student_report(_change_pass, username, 0);
     }
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
@@ -185,6 +218,32 @@ void change_datetime(const char *date, const char *time) {
     strcpy(current_date_time.date, date);
     strcpy(current_date_time.time, time);
     last_time = current_time;
+    if (current_user.user_type == student) {
+        student_report(_change_datetime, current_user.username, 0);
+    }
 }
 
+void student_report(int affair_id, const char *student_id, double balance_change) {
+    char sql[max_size];
+    char *errmsg = NULL;
+    sprintf(sql, "insert into STUDENT_REPORTS values(%d, '%s', '%s', '%s', %lf);", ID[student_report_id], student_affairs[affair_id], student_id, current_date_time.date, balance_change);
+    int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+    }
+    ++ID[student_report_id];
+}
+
+void system_report(int affair_id, double amount) {
+    char sql[max_size];
+    char *errmsg = NULL;
+    sprintf(sql, "insert into SYSTEM_REPORTS values(%d, '%s', '%s', %lf);", ID[system_report_id], system_affairs[affair_id], current_date_time.date, amount);
+    int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+    }
+    ++ID[system_report_id];
+}
 

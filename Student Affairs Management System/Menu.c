@@ -19,31 +19,7 @@ static register_parameter register_input;
 static approve_parameter approve_input;
 static self_parameter self_input;
 
-int print_data(void *data, int argc, char **argv, char **col_name) {
-    *((int *)data) = success;
-    for (int i = 0; i < argc; ++i) {
-        printf("%s: %s\n", col_name[i], argv[i]);
-    }
-    return 0;
-}
-
-int get_data(const char *columns, const char *tbl_name) {
-    system("clear");
-    char *errmsg = NULL;
-    char sql[max_size];
-    sprintf(sql, "select %s from %s;", columns, tbl_name);
-    int exist = not_found;
-    int rc = sqlite3_exec(db, sql, print_data, &exist, &errmsg);
-    if (rc != SQLITE_OK) {
-        printf("SQL error: %s", errmsg);
-        sqlite3_free(errmsg);
-        return permission_denied;
-    }
-    if (exist == not_found) {
-        return not_found;
-    }
-    return success;
-}
+// sys clear before get data
 
 void get_self_input(self_parameter *input) {
     printf("Self_id: ");
