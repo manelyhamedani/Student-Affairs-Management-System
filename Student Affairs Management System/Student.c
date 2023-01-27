@@ -476,18 +476,10 @@ int change_self(const char *date, const char *meal, const char *new_self) {
     if (is_exists("RESERVED_MEAL", condition) != 1) {
         return not_found;
     }
-    int self_id;
-    sprintf(sql, "select self_id from RESERVED_MEAL where date = '%s' and type = '%s' and student_id = '%s';", date, meal, current_user.username);
-    int rc = sqlite3_exec(db, sql, callback, &self_id, &errmsg);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: \n%s\n", errmsg);
-        sqlite3_free(errmsg);
-        return sql_err;
-    }
     set_date_time();
     int time_check;
-    sprintf(sql, "select (select %s_time_start from SELF where self_id = %d) - %s >= 0300;", meal, self_id, current_date_time.time);
-    rc = sqlite3_exec(db, sql, callback, &time_check, &errmsg);
+    sprintf(sql, "select %s_time_start - %s >= 0300 from SELF inner join RESERVED_MEAL on SELF.self_id = RESERVED_MEAL.self_id where date = '%s' and RESERVED_MEAL.type = '%s' and student_id = '%s';", meal, current_date_time.time, date, meal, current_user.username);
+    int rc = sqlite3_exec(db, sql, callback, &time_check, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
@@ -566,9 +558,9 @@ int vote(int poll_id, int option, int is_testcase) {
 int get_reserved_meal_plan(int week) {
     set_date_time();
     char str[max_size];
-    int day_start = current_time->tm_wday + week * 7;
-    int day_end = day_start + 7;
-    sprintf(str, "RESERVED_MEAL where date >= date('%s', '%d day') and date <= date('%s', '%d day')", current_date_time.date, day_start, current_date_time.date, day_end);
+    int day_start = -1 - current_time->tm_wday + week * 7;
+    int day_end = day_start + 6;
+    sprintf(str, "RESERVED_MEAL where student_id = '%s' and date >= date('%s', '%d day') and date <= date('%s', '%d day')", current_user.username, current_date_time.date, day_start, current_date_time.date, day_end);
     return get_data("*", str);
 }
 

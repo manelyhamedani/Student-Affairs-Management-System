@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include "Admin.h"
 
 
 struct _user current_user;
@@ -27,6 +28,7 @@ int print_data(void *data, int argc, char **argv, char **col_name) {
     for (int i = 0; i < argc; ++i) {
         printf("%s: %s\n", col_name[i], argv[i]);
     }
+    puts("");
     return 0;
 }
 
@@ -160,6 +162,9 @@ int user_register(const char *name, const char *family, const char *user_id, con
         sqlite3_free(errmsg);
         return sql_err;
     }
+    if (current_user.user_type == admin) {
+        approve(user_id);
+    }
     return success;
 }
 
@@ -215,12 +220,12 @@ int create_db(const char *db_name, sqlite3 **ppDB) {
 
 
 void change_datetime(const char *date, const char *time) {
-    strcpy(current_date_time.date, date);
-    strcpy(current_date_time.time, time);
-    last_time = current_time;
     if (current_user.user_type == student) {
         student_report(_change_datetime, current_user.username, 0);
     }
+    strcpy(current_date_time.date, date);
+    strcpy(current_date_time.time, time);
+    last_time = current_time;
 }
 
 void student_report(int affair_id, const char *student_id, double balance_change) {

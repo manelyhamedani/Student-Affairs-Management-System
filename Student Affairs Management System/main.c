@@ -162,6 +162,7 @@ int create_my_tables(void) {
 static int set_id_callback(void *data, int argc, char **argv, char **col_name) {
     static int counter = 0;
     if (argv[0] == NULL) {
+        ++counter;
         return 0;
     }
     sscanf(argv[0], "%d", &(((int *)data)[counter]));
@@ -177,8 +178,8 @@ void set_id(void) {
                 "select max(poll_id) from POLL;" \
                 "select max(reserved_meal_id) from RESERVED_MEAL;" \
                 "select max(taken_meal_id) from TAKEN_MEAL;" \
-                "select max(report_id) from STUDENT_REPORTS;" \
-                "select max(report_id) from SYSTEM_REPORTS;";  
+                "select max(student_reports.report_id) from STUDENT_REPORTS;" \
+                "select max(system_reports.report_id) from SYSTEM_REPORTS;";
     int rc = sqlite3_exec(db, sql, set_id_callback, ID, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: \n%s\n", errmsg);
@@ -202,6 +203,7 @@ int main(int argc, const char * argv[]) {
         sqlite3_free(errmsg);
         return -1;
     }
+    
 //    if (create_db(db_name, &db) != 0) {
 //        puts("Cannot create database!");
 //        return -1;
@@ -210,11 +212,10 @@ int main(int argc, const char * argv[]) {
 //        puts("Cannot create tables!");
 //        return -1;
 //    }
+    
     current_user.user_type = none;
     set_system_datetime();
     set_id();
-    
-//    get_command(input, output);
     
     char test_case_flag;
     puts("Do you wanna open test-case file? (y or n)");

@@ -61,37 +61,6 @@ int get_register_parameter(FILE *input, register_parameter *parameter) {
     if (strcmp(parameter->type, "admin") && strcmp(parameter->type, "student")) {
         return invalid;
     }
-//    p = parameter->national_id;
-//    while (*p != '\0') {
-//        if (isdigit(*p) == 0) {
-//            return invalid;
-//        }
-//        ++p;
-//    }
-//    for (int i = 0; i < 4; ++i) {
-//        if (isdigit(parameter->birthdate[i]) == 0) {
-//            return invalid;
-//        }
-//    }
-//    if (parameter->birthdate[4] != '-') {
-//        return invalid;
-//    }
-//    for (int i = 5; i < 7; ++i) {
-//        if (isdigit(parameter->birthdate[i]) == 0) {
-//            return invalid;
-//        }
-//    }
-//    if (parameter->birthdate[7] != '-') {
-//        return invalid;
-//    }
-//    for (int i = 8; i < 10; ++i) {
-//        if (isdigit(parameter->birthdate[i]) == 0) {
-//            return invalid;
-//        }
-//    }
-//    if (parameter->birthdate[10] != '\0') {
-//        return invalid;
-//    }
     return success;
 }
 
@@ -437,9 +406,6 @@ void get_command(FILE *input, FILE *output) {
                 else {
                     fprintf(output, "%d#success\n", command_id);
                 }
-            }
-            if (current_user.user_type == admin) {
-                approve(parameter.user_id);
             }
             continue;
         }
