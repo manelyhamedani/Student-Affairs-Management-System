@@ -314,7 +314,7 @@ int get_take_food_input(take_food_parameter *input) {
     scanf(" %[^'\n']", input->meal);
     printf("Self list:\n");
     char str[max_size];
-    sprintf(str, "SELF inner join SELF on SELF.self_id = RESERVED_MEAL.self_id where date = '%s' and type = '%s' and (student_id = '%s' or agent = '%s' and taken = 0)", input->date, input->meal, current_user.username, current_user.username);
+    sprintf(str, "SELF inner join RESERVED_MEAL on SELF.self_id = RESERVED_MEAL.self_id where date = '%s' and RESERVED_MEAL.type = '%s' and (student_id = '%s' or agent = '%s' and taken = 0)", input->date, input->meal, current_user.username, current_user.username);
     if (get_data("SELF.self_id, name", str) == not_found) {
         system("clear");
         puts("Self list is empty! You didn't reserve any meal for today.");
@@ -778,6 +778,31 @@ void get_login_input(login_parameter *input) {
     strcpy(input->password, temp_pass);
 }
 
+void student_menu(void);
+
+static void handle_insufficient_money(int *result) {
+    while (*result == insufficient_money) {
+        system("clear");
+        puts("Insufficient money! Charge your account.");
+        if (get_charge_account_input(&charge_account_input) == cancel) {
+            student_menu();
+            break;
+        }
+        if (charge_account(charge_account_input.amount) == sql_err) {
+            system("clear");
+            puts("SQL ERROR HAPPENED!");
+            sleep(waiting_time);
+            student_menu();
+            break;
+        }
+        else {
+            system("clear");
+            puts("Your account successfully charged.");
+            *result = daily_reserve(daily_reserve_input.self_id, daily_reserve_input.food_id);
+        }
+    }
+}
+
 void student_menu(void) {
     system("clear");
     printf("1)  Reserve food\n"
@@ -981,6 +1006,7 @@ void student_menu(void) {
                 break;
             }
             result = daily_reserve(daily_reserve_input.self_id, daily_reserve_input.food_id);
+            handle_insufficient_money(&result);
             if (result == sql_err) {
                 system("clear");
                 puts("SQL ERROR HAPPENED!");
@@ -1008,26 +1034,6 @@ void student_menu(void) {
                 sleep(waiting_time);
                 student_menu();
                 break;
-            }
-            while (result == insufficient_money) {
-                system("clear");
-                puts("Insufficient money! Charge your account.");
-                if (get_charge_account_input(&charge_account_input) == cancel) {
-                    student_menu();
-                    break;
-                }
-                if (charge_account(charge_account_input.amount) == sql_err) {
-                    system("clear");
-                    puts("SQL ERROR HAPPENED!");
-                    sleep(waiting_time);
-                    student_menu();
-                    break;
-                }
-                else {
-                    system("clear");
-                    puts("Your account successfully charged.");
-                }
-                result = daily_reserve(daily_reserve_input.self_id, daily_reserve_input.food_id);
             }
             break;
         case 7:
