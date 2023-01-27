@@ -22,4 +22,5 @@ int vote(int poll_id, int option, int is_testcase);
 int get_reserved_meal_plan(int week);
 int get_financial_report(void);
 int get_taken_meal_report(void);
+
 #endif /* Student_h */

@@ -34,7 +34,7 @@ static int callback(void *data, int argc, char **argv, char **col_name) {
     char *errmsg = NULL;
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
         return -1;
     }
@@ -51,17 +51,17 @@ int approve(const char *user_id) {
     sprintf(sql, "select * from PENDING where user_id = '%s';", user_id);
     int rc = sqlite3_exec(db, sql, callback, &exist, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     if (exist == success) {
         sprintf(sql, "delete from PENDING where user_id = '%s';", user_id);
         rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
         if (rc != SQLITE_OK) {
-            fprintf(stderr, "SQL error: %s\n", errmsg);
+            fprintf(stderr, "SQL error: \n%s\n", errmsg);
             sqlite3_free(errmsg);
-            return permission_denied;
+            return sql_err;
         }
         return success;
     }
@@ -73,9 +73,9 @@ int approve(const char *user_id) {
     sprintf(sql, "update STUDENTS set activate = 1 where student_id = '%s';", user_id);
     rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     return success;
 }
@@ -94,9 +94,9 @@ int change_student_pass(const char *user_id, const char *new_pass) {
     sprintf(sql, "update STUDENTS set password = '%s' where student_id = '%s';", new_pass, user_id);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     student_report(_change_pass_by_admin, user_id, 0);
     return success;
@@ -116,9 +116,9 @@ int remove_student(const char *user_id) {
     sprintf(sql, "delete from STUDENTS where student_id = '%s';", user_id);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     return success;
 }
@@ -137,9 +137,9 @@ int deactivate(const char *user_id) {
     sprintf(sql, "update STUDENTS set activate = 0 where student_id = '%s';", user_id);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     return success;
 }
@@ -153,9 +153,9 @@ int define_self(const char *self_id, const char *name, const char *location, con
     sprintf(sql, "insert into SELF values(%s, '%s', '%s', %s, '%s', '%s', %s, %s, %s, %s);", self_id, name, location, capacity, type, meal, lunch_time_start, lunch_time_end, dinner_time_start, dinner_time_end);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     return success;
 }
@@ -169,9 +169,9 @@ int define_food(const char *food_id, const char *name, const char *type, const c
     sprintf(sql, "insert into FOOD values(%s, '%s', '%s', %s);", food_id, name, type, price);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     return success;
 }
@@ -194,9 +194,9 @@ int define_meal_plan(const char *self_id, const char *date, const char *type, co
     sprintf(sql, "insert into MEAL_PLAN values(%d, %s, %s, '%s', '%s', %s);", ID[meal_plan_id], self_id, food_id, date, type, count);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     ++ID[meal_plan_id];
     return success;
@@ -216,9 +216,9 @@ int charge_student_account(const char *user_id, const char *amount) {
     sprintf(sql, "update STUDENTS set balance = balance + %s where student_id = '%s';", amount, user_id);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     student_report(_recieve_charge_by_admin, user_id, atof(amount));
     return success;
@@ -233,9 +233,9 @@ int add_news(const char *title, const char *content, const char *end_date) {
     sprintf(sql, "insert into NEWS values(%d, '%s', '%s', '%s');", ID[news_id], title, content, end_date);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     ++ID[news_id];
     return success;
@@ -250,9 +250,9 @@ int add_poll(const char *question, const char *option1, const char *option2, con
     sprintf(sql, "insert into POLL values(%d, '%s', '%s', '%s', %d, '%s', %d, '%s', %d, '%s', %d);", ID[poll_id], end_date, question, option1, 0, option2, 0, option3, 0, option4, 0);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     ++ID[poll_id];
     return success;
@@ -277,10 +277,14 @@ int get_student_report(const char *start_date, const char *end_date, const char 
     return get_data("*", str);
 }
 
-int get_system_report(const char *start_date, const char *end_date) {
+int get_system_report(const char *start_date, const char *end_date, int affair) {
     char str[max_size];
-    sprintf(str, "SYSTEM_REPORTS where julianday(date) >= julianday('%s') and julianday(date) <= julianday('%s')", start_date, end_date);
-    return get_data("*", str);
+    if (affair == _sum_amount) {
+        sprintf(str, "SYSTEM_REPORTS where julianday(date) >= julianday('%s') and julianday(date) <= julianday('%s')", start_date, end_date);
+        return get_data("sum(amount)", str);
+    }
+    sprintf(str, "SYSTEM_REPORTS where affair = '%s' and julianday(date) >= julianday('%s') and julianday(date) <= julianday('%s')", system_affairs[affair], start_date, end_date);
+    return get_data("count(), sum(amount)", str);
 }
 
 

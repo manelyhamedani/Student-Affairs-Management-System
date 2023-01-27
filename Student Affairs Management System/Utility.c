@@ -37,9 +37,9 @@ int get_data(const char *columns, const char *tbl_name) {
     int exist = not_found;
     int rc = sqlite3_exec(db, sql, print_data, &exist, &errmsg);
     if (rc != SQLITE_OK) {
-        printf("SQL error: %s", errmsg);
+        printf("SQL error: \n%s", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     if (exist == not_found) {
         return not_found;
@@ -86,7 +86,7 @@ int is_exists(const char *tbl_name, const char *condition) {
     int exist = 0;
     int rc = sqlite3_exec(db, sql, callback, &exist, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
         return -1;
     }
@@ -156,9 +156,9 @@ int user_register(const char *name, const char *family, const char *user_id, con
     sprintf(sql, "insert into PENDING values ('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s');", user_id, name, family, password, national_id, birthdate, gender, type);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     return success;
 }
@@ -181,9 +181,9 @@ int change_pass(const char *username, const char *old_pass, const char *new_pass
     }
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     return success;
 }
@@ -195,9 +195,9 @@ int create_table(sqlite3 *db, const char *tbl_name, const char *definition) {
     sprintf(sql, "create table if not exists %s (%s);", tbl_name, definition);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     return 0;
 }
@@ -206,9 +206,9 @@ int create_db(const char *db_name, sqlite3 **ppDB) {
     char *errmsg = NULL;
     int rc = sqlite3_open(db_name, ppDB);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
-        return permission_denied;
+        return sql_err;
     }
     return 0;
 }
@@ -229,7 +229,7 @@ void student_report(int affair_id, const char *student_id, double balance_change
     sprintf(sql, "insert into STUDENT_REPORTS values(%d, '%s', '%s', '%s', %lf);", ID[student_report_id], student_affairs[affair_id], student_id, current_date_time.date, balance_change);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
     }
     ++ID[student_report_id];
@@ -241,7 +241,7 @@ void system_report(int affair_id, double amount) {
     sprintf(sql, "insert into SYSTEM_REPORTS values(%d, '%s', '%s', %lf);", ID[system_report_id], system_affairs[affair_id], current_date_time.date, amount);
     int rc = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
     }
     ++ID[system_report_id];

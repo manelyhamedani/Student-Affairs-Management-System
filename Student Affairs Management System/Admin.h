@@ -20,5 +20,5 @@ int add_news(const char *title, const char *content, const char *end_date);
 int add_poll(const char *question, const char *option1, const char *option2, const char *option3, const char *option4, const char *end_date);
 int statistics(const char *date, const char *meal, int is_taken);
 int get_student_report(const char *start_date, const char *end_date, const char *student_id);
-int get_system_report(const char *start_date, const char *end_date);
+int get_system_report(const char *start_date, const char *end_date, int affair);
 #endif /* Admin_h */

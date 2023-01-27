@@ -181,7 +181,7 @@ void set_id(void) {
                 "select max(report_id) from SYSTEM_REPORTS;";  
     int rc = sqlite3_exec(db, sql, set_id_callback, ID, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
     }
 }
@@ -198,7 +198,7 @@ int main(int argc, const char * argv[]) {
     char *errmsg = NULL;
     int rc = sqlite3_open(db_name, &db);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        fprintf(stderr, "SQL error: \n%s\n", errmsg);
         sqlite3_free(errmsg);
         return -1;
     }

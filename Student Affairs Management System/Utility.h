@@ -16,7 +16,7 @@ enum type {
 };
 
 enum result {
-    success, not_found, permission_denied, invalid, end_of_line, end_of_file, insufficient_money, stop
+    success, not_found, permission_denied, invalid, end_of_line, end_of_file, insufficient_money, stop, cancel, sql_err
 };
 
 enum student_affair {
@@ -24,7 +24,7 @@ enum student_affair {
 };
 
 enum system_affair {
-    _food_reserved, _food_taken, _daily_reserved, _dessert_reserved, _dessert_taken, _cancel_reserved
+    _food_reserved, _food_taken, _daily_reserved, _dessert_reserved, _dessert_taken, _cancel_reserved, _sum_amount
 };
 
 extern sqlite3 *db;
@@ -193,6 +193,30 @@ typedef struct {
     char date[max_size];
     char time[max_size];
 } datetime_parameter;
+
+typedef struct {
+    char date[max_size];
+    char meal[max_size];
+    int is_taken;
+} statistics_parameter;
+
+typedef struct {
+    char start_date[max_size];
+    char end_date[max_size];
+    char student_id[max_size];
+} student_report_parameter;
+
+typedef struct {
+    char start_date[max_size];
+    char end_date[max_size];
+    int affair;
+} system_report_parameter;
+
+typedef struct {
+    int poll_id;
+    int option;
+} vote_parameter;
+
 
 int user_login(const char *username, const char *password);
 int user_logout(const char *username);
